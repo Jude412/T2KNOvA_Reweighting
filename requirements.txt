@@ -1,0 +1,10 @@
+numpy 
+matplotlib
+tensorflow
+hep_ml
+torch
+mplhep
+pandas
+uproot
+awkward
+snakemake

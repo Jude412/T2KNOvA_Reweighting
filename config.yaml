@@ -1,0 +1,30 @@
+paths:
+  neut_file: "/home/hep/tlt26/RW_Snakemake/NEUT_file/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root"
+  genie_file: "/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root"
+
+analysis:
+  mode: 1
+  neutrino_PDG: 14
+  train_percentage: 0.4
+  val_percentage: 0.4
+
+features:
+  parameters_interest:
+    - Enu_true
+    - ELep
+    - CosLep
+    - W
+    - Eav
+
+models:
+  model_list:
+    - binning
+    - NN
+    - GBR
+    - XGB
+
+dimensions:
+  dim: 5
+
+output:
+  tag: "snakemake_test"

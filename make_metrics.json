@@ -1,0 +1,4 @@
+{"Binning" : "/home/hep/tlt26/T2K_Rw/Ndim/saved_weights/7D/binning_weights_test_7D.csv",
+"NN" : "/home/hep/tlt26/T2K_Rw/Ndim/saved_weights/7D/NN_weights_test_7D.csv",
+"GBR" : "/home/hep/tlt26/T2K_Rw/Ndim/saved_weights/7D/GBR_weights_test_7D.csv",
+"XGB" : "/home/hep/tlt26/T2K_Rw/Ndim/saved_weights/7D/XGB_weights_test_7D.csv"}
