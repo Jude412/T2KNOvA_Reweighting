@@ -1,0 +1,16 @@
+name: snakemake-env
+channels:
+  - conda-forge
+dependencies:
+    - python=3.9
+    - pip
+    - pip:
+      - matplotlib
+      - tensorflow
+      - hep_ml
+      - torch
+      - mplhep
+      - pandas
+      - uproot
+      - awkward
+      - snakemake

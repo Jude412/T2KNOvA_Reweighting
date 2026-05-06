@@ -2,6 +2,7 @@ configfile: "config.yaml"
 
 import json
 
+ENV = "environment.yaml"
 TAG = config["output"]["tag"]
 DIM = config["dimensions"]["dim"]
 RUNS = range(200)
@@ -32,6 +33,9 @@ rule initialize_analysis:
         samples_dir_8D=directory(INIT_SAMPLES_DIR + "8D/"),
         last_sampled_file_3D = INIT_SAMPLES_DIR + "3D/target_test.csv",
         last_sampled_file_8D = INIT_SAMPLES_DIR + "8D/target_test.csv"
+
+    conda:
+        ENV
     
     shell:
         """
@@ -53,6 +57,8 @@ rule run_initial_bootstrap_3D:
         last_sampled_file = INIT_SAMPLES_DIR + "3D/target_test.csv"
     output:
         output_file=INIT_SWD_DIR + "3D/indiv_bootstrap/run_{run_id}.npy"
+    conda:
+        ENV
     shell:
         """
         python Bootstrap_swd.py \
@@ -67,15 +73,17 @@ rule aggregate_bootstrap_3D:
         expand(INIT_SWD_DIR + "3D/indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=INIT_SWD_DIR + "3D/swd_distribution_3D.npy"
-    run:
-        import numpy as np
-
-        arrays = [np.load(f) for f in input]
-
-        # Most likely shape: (1,) per file → flatten
-        combined = np.concatenate(arrays, axis=0)
-
-        np.save(output.final_file, combined)
+    conda:
+        ENV
+    shell:
+        """
+        python - << 'EOF'
+import numpy as np
+arrays = [np.load(f) for f in {input}]
+combined = np.concatenate(arrays, axis=0)
+np.save("{output.final_file}", combined)
+EOF
+        """
 
 
 rule run_initial_bootstrap_8D:
@@ -84,6 +92,8 @@ rule run_initial_bootstrap_8D:
         last_sampled_file = INIT_SAMPLES_DIR + "8D/target_test.csv"
     output:
         output_file=INIT_SWD_DIR + "8D/indiv_bootstrap/run_{run_id}.npy"
+    conda:
+        ENV
     shell:
         """
         python Bootstrap_swd.py \
@@ -98,15 +108,17 @@ rule aggregate_bootstrap_8D:
         expand(INIT_SWD_DIR + "8D/indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=INIT_SWD_DIR + "8D/swd_distribution_8D.npy"
-    run:
-        import numpy as np
-
-        arrays = [np.load(f) for f in input]
-
-        # Most likely shape: (1,) per file → flatten
-        combined = np.concatenate(arrays, axis=0)
-
-        np.save(output.final_file, combined)
+    conda:
+        ENV
+    shell:
+        """
+        python - << 'EOF'
+import numpy as np
+arrays = [np.load(f) for f in {input}]
+combined = np.concatenate(arrays, axis=0)
+np.save("{output.final_file}", combined)
+EOF
+        """
 
 
 rule custom_dim_analysis:
@@ -125,8 +137,8 @@ rule custom_dim_analysis:
     output:
         samples_dir=directory(SAMPLES_DIR),
         last_sampled_file = SAMPLES_DIR + "target_test.csv"
-    
-    
+    conda:
+        ENV
     shell:
         """
         python Splitting-script.py \
@@ -145,6 +157,8 @@ rule run_custom_bootstrap:
         samples_dir= SAMPLES_DIR + "target_test.csv",
     output:
         output_file= SWD_DIR + "indiv_bootstrap/run_{run_id}.npy"
+    conda:
+        ENV
     shell:
         """
         python Bootstrap_swd.py \
@@ -159,15 +173,17 @@ rule aggregate_custom_bootstrap:
         expand(SWD_DIR + "indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=SWD_DIR + f"swd_distribution_{DIM}D.npy"
-    run:
-        import numpy as np
-
-        arrays = [np.load(f) for f in input]
-
-        # Most likely shape: (1,) per file → flatten
-        combined = np.concatenate(arrays, axis=0)
-
-        np.save(output.final_file, combined)
+    conda:
+        ENV
+    shell:
+        """
+        python - << 'EOF'
+import numpy as np
+arrays = [np.load(f) for f in {input}]
+combined = np.concatenate(arrays, axis=0)
+np.save("{output.final_file}", combined)
+EOF
+        """
 
     
 rule train_models:
@@ -185,6 +201,8 @@ rule train_models:
         weights_dir=directory(WEIGHTS_DIR),
         last_written_file = WEIGHTS_DIR + f"weights_path_dict_{DIM}D.json"
         
+    conda:
+        ENV
     shell:
         """
         python Training.py \
@@ -217,6 +235,9 @@ rule compute_metrics_plots:
     params:
         parameters_interest=config["features"]["parameters_interest"]
     
+    conda:
+        ENV
+    
     shell:
         """
         python Calc_Metrics.py \
@@ -237,3 +258,4 @@ rule compute_metrics_plots:
 rule all:
     input:
         FIG_DIR + "metrics.json"
+    

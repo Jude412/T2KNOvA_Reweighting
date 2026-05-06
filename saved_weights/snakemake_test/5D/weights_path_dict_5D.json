@@ -1,6 +1,0 @@
-{
-"binning": "saved_weights/snakemake_test/5D/binning_weights_test_5D.csv",
-"NN": "saved_weights/snakemake_test/5D/NN_weights_test_5D.csv",
-"GBR": "saved_weights/snakemake_test/5D/GBR_weights_test_5D.csv",
-"XGB": "saved_weights/snakemake_test/5D/XGB_weights_test_5D.csv"
-}
