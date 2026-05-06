@@ -27,4 +27,4 @@ dimensions:
   dim: 5
 
 output:
-  tag: "snakemake_test"
+  tag: "potato_test"

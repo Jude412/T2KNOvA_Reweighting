@@ -74,17 +74,12 @@ rule aggregate_bootstrap_3D:
         expand(INIT_SWD_DIR + "3D/indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=INIT_SWD_DIR + "3D/swd_distribution_3D.npy"
-    conda:
-        ENV
-    shell:
-        """
-        python - << 'EOF'
-import numpy as np
-arrays = [np.load(f) for f in {input}]
-combined = np.concatenate(arrays, axis=0)
-np.save("{output.final_file}", combined)
-EOF
-        """
+    run:
+        import numpy as np
+
+        arrays = [np.load(f) for f in input]
+        combined = np.concatenate(arrays, axis=0)
+        np.save(output[0], combined)
 
 
 rule run_initial_bootstrap_8D:
@@ -109,17 +104,12 @@ rule aggregate_bootstrap_8D:
         expand(INIT_SWD_DIR + "8D/indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=INIT_SWD_DIR + "8D/swd_distribution_8D.npy"
-    conda:
-        ENV
-    shell:
-        """
-        python - << 'EOF'
-import numpy as np
-arrays = [np.load(f) for f in {input}]
-combined = np.concatenate(arrays, axis=0)
-np.save("{output.final_file}", combined)
-EOF
-        """
+    run:
+        import numpy as np
+
+        arrays = [np.load(f) for f in input]
+        combined = np.concatenate(arrays, axis=0)
+        np.save(output[0], combined)
 
 
 rule custom_dim_analysis:
@@ -174,17 +164,12 @@ rule aggregate_custom_bootstrap:
         expand(SWD_DIR + "indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
     output:
         final_file=SWD_DIR + f"swd_distribution_{DIM}D.npy"
-    conda:
-        ENV
-    shell:
-        """
-        python - << 'EOF'
-import numpy as np
-arrays = [np.load(f) for f in {input}]
-combined = np.concatenate(arrays, axis=0)
-np.save("{output.final_file}", combined)
-EOF
-        """
+    run:
+        import numpy as np
+
+        arrays = [np.load(f) for f in input]
+        combined = np.concatenate(arrays, axis=0)
+        np.save(output[0], combined)
 
     
 rule train_models:
