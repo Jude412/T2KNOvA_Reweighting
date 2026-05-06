@@ -1,5 +1,14 @@
 This repository allows one to perform a reweighting analysis on any given Nuisance file. 
 
+[Initializing if you don't have conda installed]
+If you DO have conda installed, simply add --use-conda at the end of any command including snakemake.
+If you DO NOT have conda installed, you should first create a virtual environment with the following command :
+    python -m venv .venv
+    source .venv/bin/activate
+and then install the necessary librairies with :
+    pip install -r requirements.txt
+Please use the snakemake commands WITHOUT --use-conda at the end
+
 After cloning the repository, one should first download the input files. For example, the Neut and Genie files used in previous analysis were taken from:
     -https://portal.nersc.gov/project/nuisance/MC_IOP_review/GENIEv3_G18_10b_00_000/, especially : T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root
     -https://portal.nersc.gov/project/nuisance/MC_IOP_review/NEUT562/, especially : T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root
@@ -29,6 +38,7 @@ For example this can include parts of the name of the reweighted distributions.
 Please use strings.
 
 [The following steps are hacky and will be removed when the grid search feature will be ready]
+///
 In the 'set_hyperparameters' directory, create a sub-directory with the same tag that you gave in the 'config.yaml' file.
 Inside this directory, create a file named 'hyperparameters.json'. This file should contain a dictionnary, containing a dictionnary of the set of hyperparameters you want the different method to be built with. 
 For example : 
@@ -38,11 +48,12 @@ For example :
 "XGB" : {"n_estimators" : 80, "gamma" : 0, "max_depth" : 3, "learning_rate" : 0.075, "subsample" : 1, "early_stopping_rounds" : 10}}
 
 Please give as many sets as different method you want to train.
+///
 
 Once all the above steps are completed, you are ready to run the analysis.
 To run a complete analysis, including samples creation, model training, metrics evaluation and plotting, enter the following command in your terminal: 
 
-snakemake saved_figures/snakemake_test/{Dim}D/metrics.json --cores 8
+snakemake saved_figures/snakemake_test/{Dim}D/metrics.json --cores 8  (--use-conda  (only if you use conda))
 
 where {Dim} should be replaced by the number of dimensions given in the 'dimensions'/'dim' section of the 'config.yaml' file.
 Once finished, you can explore the different 'saved' folders containing the samples, models, metrics and plots.
