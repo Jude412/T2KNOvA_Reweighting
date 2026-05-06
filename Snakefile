@@ -31,8 +31,9 @@ rule initialize_analysis:
     output:
         samples_dir_3D=directory(INIT_SAMPLES_DIR + "3D/"),
         samples_dir_8D=directory(INIT_SAMPLES_DIR + "8D/"),
-        last_sampled_file_3D = INIT_SAMPLES_DIR + "3D/target_test.csv",
-        last_sampled_file_8D = INIT_SAMPLES_DIR + "8D/target_test.csv"
+        original_test = INIT_SAMPLES_DIR + "8D/original_test.csv",
+        target_test = INIT_SAMPLES_DIR + "8D/target_test.csv",
+        last_sampled_file_3D = INIT_SAMPLES_DIR + "3D/target_test.csv"
 
     conda:
         ENV
