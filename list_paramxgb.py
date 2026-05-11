@@ -8,12 +8,13 @@ gamma_list = [0]
 min_child_weight_list = [1] #default 1
 lambda_list = [1] #default 1
 alpha_list = [0] #default 0
+early_stopping_rounds_list = [10]
 
 sub_file_template = ""
 
 counter = 0
 
-os.makedirs("hps/xgb", exist_ok=True)
+os.makedirs("hps/XGB", exist_ok=True)
 for n_estimator in n_estimators_list:
   for learning_rate in learning_rate_list:
     for max_depth in max_depth_list:
@@ -22,13 +23,14 @@ for n_estimator in n_estimators_list:
           for min_child_weight in min_child_weight_list:
             for lambda_val in lambda_list:
               for alpha_val in alpha_list:
-                with open(f"hps/xgb/XGB_hp_{counter}.json", "w") as f:
-                  json.dump({"n_estimators": n_estimator, "learning_rate": learning_rate, "max_depth": max_depth, "subsample": subsample, "gamma": gamma, "min_child_weight": min_child_weight, "lambda": lambda_val, "alpha": alpha_val}, f)
+                for early_stopping_rounds in early_stopping_rounds_list:
+                  with open(f"hps/XGB/XGB_hp_{counter}.json", "w") as f:
+                    json.dump({"n_estimators": n_estimator, "learning_rate": learning_rate, "max_depth": max_depth, "subsample": subsample, "gamma": gamma, "min_child_weight": min_child_weight, "lambda": lambda_val, "alpha": alpha_val, "early_stopping_rounds": early_stopping_rounds}, f)
 
-                sub_file_template += f"/home/hep/tlt26/T2K_Rw/hps/xgb/XGB_hp_{counter}.json\n"
+                sub_file_template += f"/home/hep/tlt26/T2K_Rw/hps/XGB/XGB_hp_{counter}.json\n"
                 counter += 1
 
 sub_file_template += ")"
 
-with open("hps/xgb/XGB_job.sub", "w") as f:
+with open("hps/XGB/XGB_job.sub", "w") as f:
   f.write(sub_file_template)

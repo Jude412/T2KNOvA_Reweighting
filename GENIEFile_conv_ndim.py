@@ -34,4 +34,3 @@ def convert_GENIE_input_file_ndim(input_file, mode, neutrino_PDG, list_parameter
         return data, weights
     else:
         return data
-    

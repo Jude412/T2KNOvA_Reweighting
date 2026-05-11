@@ -22,6 +22,13 @@ models:
     - NN
     - GBR
     - XGB
+  
+  number_model_hyperparameters_sets:
+    binning: 24
+    NN: 240
+    GBR: 270
+    XGB : 150
+    
 
 dimensions:
   dim: 5

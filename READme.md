@@ -3,7 +3,7 @@ This repository allows one to perform a reweighting analysis on any given Nuisan
 [Initializing if you don't have conda installed]
 If you DO have conda installed, simply add --use-conda at the end of any command including snakemake.
 If you DO NOT have conda installed, you should first create a virtual environment with the following command :
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate
 and then install the necessary librairies with :
     pip install -r requirements.txt

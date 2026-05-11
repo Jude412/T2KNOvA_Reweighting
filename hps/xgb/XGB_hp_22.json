@@ -1,1 +1,0 @@
-{"n_estimators": 100, "learning_rate": 0.075, "max_depth": 4, "subsample": 0.5, "gamma": 0, "min_child_weight": 1, "lambda": 1, "alpha": 0}

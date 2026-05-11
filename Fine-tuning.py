@@ -24,44 +24,47 @@ if __name__ == "__main__":
     args.add_argument('--model', type=str, required=True, choices=['binning', 'NN', 'GBR', 'XGB'], help='The reweighting model to train.')
     args.add_argument('--hyperparameters', type=str, required=True, help="Path to JSON file containing hyperparameters to train the XGBoost model.")
     args.add_argument('--logdir', type=str, required=False, default="/home/hep/tlt26/T2K_Rw/Ndim/TensorBoard/test_run2", help="The directory where the tensorboard log file will be saved.")
-    args.add_argument("--swd_distribution", type = str, help = "The distribution to compute the Training-dim SWD p-value for.")
+    args.add_argument("--custom_swd_distribution", type = str, help = "The distribution to compute the Training-dim SWD p-value for.")
+    args.add_argument("--swd_distribution_3D", type = str, help = "The distribution to compute the 3D SWD p-value for.")
+    args.add_argument("--swd_distribution_8D", type = str, help = "The distribution to compute the 8D SWD p-value for.")
+    args.add_argument("--output_file", type = str, help = "The path to the csv file where the hyperparameters and metrics will be saved in addition to the tensorboard log file.")
     args = args.parse_args()
     List_parameters = ["Enu_true","ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
     # Load the data
 
-    original_train = np.loadtxt(args.train_sample_dir + "original_train.csv", delimiter=',')
-    original_val = np.loadtxt(args.train_sample_dir + "original_val.csv", delimiter=',')
-    original_test = np.loadtxt(args.train_sample_dir + "original_test.csv", delimiter=',')
-    target_train = np.loadtxt(args.train_sample_dir + "target_train.csv", delimiter=',')
-    target_val = np.loadtxt(args.train_sample_dir + "target_val.csv", delimiter=',')
-    target_test = np.loadtxt(args.train_sample_dir + "target_test.csv", delimiter=',')
+    original_train = np.loadtxt(os.path.join(args.train_sample_dir, "original_train.csv"), delimiter=',')
+    original_val = np.loadtxt(os.path.join(args.train_sample_dir, "original_val.csv"), delimiter=',')
+    original_test = np.loadtxt(os.path.join(args.train_sample_dir, "original_test.csv"), delimiter=',')
+    target_train = np.loadtxt(os.path.join(args.train_sample_dir, "target_train.csv"), delimiter=',')
+    target_val = np.loadtxt(os.path.join(args.train_sample_dir, "target_val.csv"), delimiter=',')
+    target_test = np.loadtxt(os.path.join(args.train_sample_dir, "target_test.csv"), delimiter=',')
 
-    #we need this for the 8D swd
-    original_train_3D = np.loadtxt(args.sample_dir_3D + "original_train.csv", delimiter=',')
-    target_train_3D = np.loadtxt(args.sample_dir_3D + "target_train.csv", delimiter=',')
-    original_val_3D = np.loadtxt(args.sample_dir_3D + "original_val.csv", delimiter=',')
-    target_val_3D = np.loadtxt(args.sample_dir_3D + "target_val.csv", delimiter=',')
-    original_test_3D = np.loadtxt(args.sample_dir_3D + "original_test.csv", delimiter=',')
-    target_test_3D = np.loadtxt(args.sample_dir_3D + "target_test.csv", delimiter=',')
+    #we need this for the 3D/8D swd
+    original_train_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_train.csv"), delimiter=',')
+    target_train_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_train.csv"), delimiter=',')
+    original_val_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_val.csv"), delimiter=',')
+    target_val_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_val.csv"), delimiter=',')
+    original_test_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_test.csv"), delimiter=',')
+    target_test_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_test.csv"), delimiter=',')
 
-    original_train_8D = np.loadtxt(args.sample_dir_8D + "original_train.csv", delimiter=',')
-    target_train_8D = np.loadtxt(args.sample_dir_8D + "target_train.csv", delimiter=',')
-    original_val_8D = np.loadtxt(args.sample_dir_8D + "original_val.csv", delimiter=',')
-    target_val_8D = np.loadtxt(args.sample_dir_8D + "target_val.csv", delimiter=',')
-    original_test_8D = np.loadtxt(args.sample_dir_8D + "original_test.csv", delimiter=',')
-    target_test_8D = np.loadtxt(args.sample_dir_8D + "target_test.csv", delimiter=',')
+    original_train_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_train.csv"), delimiter=',')
+    target_train_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_train.csv"), delimiter=',')
+    original_val_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_val.csv"), delimiter=',')
+    target_val_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_val.csv"), delimiter=',')
+    original_test_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_test.csv"), delimiter=',')
+    target_test_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_test.csv"), delimiter=',')
 
     # Train the model
     
     if args.model == 'binning':
-        hyperparams = json.load(open(args.hparams)) if args.hparams is not None else {"n_bins": 12, "n_neighs": 0}
+        hyperparams = json.load(open(args.hyperparameters)) if args.hyperparameters is not None else {"n_bins": 12, "n_neighs": 0}
         model = train_binning(original_train, target_train, hyperparams["n_bins"], hyperparams["n_neighs"])
         weights_test = predict_binning(model, original_test)
         logdir = args.logdir + f"/run_{hyperparams['n_bins']}_{hyperparams['n_neighs']}_{int(time.time())}"
         writer = SummaryWriter(logdir)
 
     elif args.model == 'NN':
-        hyperparams = json.load(open(args.hparams)) if args.hparams is not None else {"n_layers": 2, "n_neurons": 15, "epochs": 100, "batch_size": 2048, "activation_function": "tanh"}
+        hyperparams = json.load(open(args.hyperparameters)) if args.hyperparameters is not None else {"n_layers": 2, "n_neurons": 15, "epochs": 100, "batch_size": 2048, "activation_function": "tanh"}
         history, model, train_scale_factor = train_NN(original_train, original_val, target_train, target_val, 
                         n_layers = hyperparams["n_layers"], 
                         n_neurons = hyperparams["n_neurons"], 
@@ -73,7 +76,7 @@ if __name__ == "__main__":
         writer = SummaryWriter(logdir)
 
     elif args.model == 'GBR':
-        hyperparams = json.load(open(args.hparams)) if args.hparams is not None else {"n_estimators": 110, "learning_rate": 0.01, "max_depth": 6, "min_samples_leaf": 70, "loss_regularization": 4}
+        hyperparams = json.load(open(args.hyperparameters)) if args.hyperparameters is not None else {"n_estimators": 110, "learning_rate": 0.01, "max_depth": 6, "min_samples_leaf": 70, "loss_regularization": 4}
         model = train_GBR(original_train, target_train,
                         n_estimators = hyperparams["n_estimators"], 
                         learning_rate = hyperparams["learning_rate"], 
@@ -85,7 +88,7 @@ if __name__ == "__main__":
         writer = SummaryWriter(logdir)
     
     elif args.model == 'XGB':
-        hyperparams = json.load(open(args.hparams)) if args.hparams is not None else {'n_estimators': 100, 'learning_rate': 0.05, 'max_depth': 3, 'gamma': 2, 'subsample': 0.3, 'early_stopping_rounds': 10}
+        hyperparams = json.load(open(args.hyperparameters)) if args.hyperparameters is not None else {'n_estimators': 100, 'learning_rate': 0.05, 'max_depth': 3, 'gamma': 2, 'subsample': 0.3, 'early_stopping_rounds': 10}
         model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams)
         weights_test = predict_XGB(original_test, model)
         logdir = args.logdir + f"/run_{hyperparams['max_depth']}_{hyperparams['learning_rate']}_{hyperparams['n_estimators']}_{hyperparams['gamma']}_{hyperparams['subsample']}_{hyperparams['early_stopping_rounds']}_{int(time.time())}"
@@ -97,13 +100,13 @@ if __name__ == "__main__":
     weight_dict = {args.model: weights_test}
 
     dict_mean_swd_3D = compute_swd(original_test_3D, target_test_3D, weight_dict, n_directions = 500)
-    list_swd_3D = np.load("/home/hep/tlt26/T2K_Rw/Ndim/swd_distribution/list_swd_3D_test20p.npy")
+    list_swd_3D = np.load(args.swd_distribution_3D)
     p_value_3D = compute_p_value(dict_mean_swd_3D, list_swd_3D)[args.model]
     dict_mean_swd_8D = compute_swd(original_test, target_test, weight_dict, n_directions = 500)
-    list_swd_8D = np.load("/home/hep/tlt26/T2K_Rw/Ndim/swd_distribution/list_swd_8D_test20p.npy")
+    list_swd_8D = np.load(args.swd_distribution_8D)
     p_value_8D = compute_p_value(dict_mean_swd_8D, list_swd_8D)[args.model]
     dict_mean_swd_ndim = compute_swd(original_test, target_test, weight_dict, n_directions = 500)
-    list_swd_ndim = np.load(args.swd_distribution)
+    list_swd_ndim = np.load(args.custom_swd_distribution)
     p_value_ndim = compute_p_value(dict_mean_swd_ndim, list_swd_ndim)[args.model]
 
 
@@ -156,8 +159,8 @@ if __name__ == "__main__":
             "val_auc": model.evals_result()['validation_0']['auc'][best_iter],
             "train_logloss": model.evals_result()['validation_1']['logloss'][best_iter],
             "train_auc": model.evals_result()['validation_1']['auc'][best_iter],
-            "test_logloss": model.evals_result()['validation_2']['logloss'][best_iter],
-            "test_auc": model.evals_result()['validation_2']['auc'][best_iter],
+            # "test_logloss": model.evals_result()['validation_2']['logloss'][best_iter],
+            # "test_auc": model.evals_result()['validation_2']['auc'][best_iter],
             "SWD_3D": swd_3d,
             "p_value_3D": p_value_3D,
             "SWD_8D": swd_8d,
@@ -183,11 +186,17 @@ if __name__ == "__main__":
 
     hparams_metrics_merged = {**hyperparams, **metrics}
     df_row = pd.DataFrame([hparams_metrics_merged])
-    csv_path = args.logdir + args.model + "_Hyperparameters_metrics.csv"
+    csv_path = os.path.join(args.logdir, "Hyperparameters_metrics.csv")
+    csv_2_path = args.output_file
 
     if not os.path.isfile(csv_path):
         df_row.to_csv(csv_path, index=False)
     else:
         df_row.to_csv(csv_path, mode='a', header=False, index=False)
+
+    if not os.path.isfile(csv_2_path):
+        df_row.to_csv(csv_2_path, index=False)
+    else:
+        df_row.to_csv(csv_2_path, mode='a', header=False, index=False)
 
     print(f"Run with hyperparameters : {hyperparams} is done.")

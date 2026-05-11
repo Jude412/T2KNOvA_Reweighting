@@ -66,8 +66,8 @@ if __name__ == "__main__":
             weights_train = predict_NN(original_train, model, train_scale_factor)
             weights_val = predict_NN(original_val, model, train_scale_factor)
             weights_test = predict_NN(original_test, model, train_scale_factor)
-            print(type(history.history['loss']), history.history['loss'])
-            print(type(history.history['val_loss']), history.history['val_loss'])
+            # print(type(history.history['loss']), history.history['loss'])
+            # print(type(history.history['val_loss']), history.history['val_loss'])
             df = np.concatenate((history.history['loss'], history.history['val_loss']), axis=0)
             np.savetxt(os.path.join(args.save_model_path, f"NN_training_history_{np.shape(original_train)[1]}D.csv"), df, delimiter=',')
         

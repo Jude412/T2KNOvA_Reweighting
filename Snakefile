@@ -5,6 +5,8 @@ import json
 ENV = "environment.yaml"
 TAG = config["output"]["tag"]
 DIM = config["dimensions"]["dim"]
+NUMBER_OF_SETS = config["models"]["number_model_hyperparameters_sets"]
+MODELS = config["models"]["model_list"]
 RUNS = range(200)
 
 INIT_SAMPLES_DIR = f"saved_samples/{TAG}/"
@@ -14,8 +16,16 @@ SWD_DIR = f"saved_swd_distribution/{TAG}/{DIM}D/"
 MODEL_DIR = f"saved_models/{TAG}/{DIM}D/"
 WEIGHTS_DIR = f"saved_weights/{TAG}/{DIM}D/"
 FIG_DIR = f"saved_figures/{TAG}/{DIM}D/"
+HPS_DIR = f"hps/"
+TENSORBOARD_DIR = f"TensorBoard/{TAG}/{DIM}D/"
 
+FINE_TUNING_OUTPUTS = []
 
+for model in MODELS:
+    for run_id in range(NUMBER_OF_SETS[model]):
+        FINE_TUNING_OUTPUTS.append(
+            TENSORBOARD_DIR + f"{model}/run_{run_id}_metrics.csv"
+        )
 
 rule initialize_analysis:
     input:
@@ -174,6 +184,60 @@ rule aggregate_custom_bootstrap:
         python aggregate.py \
             --input {input} \
             --output {output.final_file}
+        """
+
+
+rule single_fine_tuning:
+    input:
+        train_samples_dir = SAMPLES_DIR,
+        init_samples_dir_3D = INIT_SAMPLES_DIR + "3D/",
+        init_samples_dir_8D = INIT_SAMPLES_DIR + "8D/",
+        hparam_file = HPS_DIR + "{model}/{model}_hp_{run_id}.json",
+        swd_distribution_3D = INIT_SWD_DIR + "3D/swd_distribution_3D.npy",
+        swd_distribution_8D = INIT_SWD_DIR + "8D/swd_distribution_8D.npy",
+        custom_swd_distribution = SWD_DIR + f"swd_distribution_{DIM}D.npy"
+
+    params:
+        model = "{model}",
+        logdir = TENSORBOARD_DIR + "{model}/"
+    
+    output:
+        output_file = TENSORBOARD_DIR + "{model}/run_{run_id}_metrics.csv"
+
+    conda:
+        ENV
+
+    shell:
+        """
+        python Fine-tuning.py \
+            --train_sample_dir {input.train_samples_dir} \
+            --sample_dir_3D {input.init_samples_dir_3D} \
+            --sample_dir_8D {input.init_samples_dir_8D} \
+            --swd_distribution_3D {input.swd_distribution_3D} \
+            --swd_distribution_8D {input.swd_distribution_8D} \
+            --model {params.model} \
+            --hyperparameters {input.hparam_file} \
+            --logdir {params.logdir} \
+            --custom_swd_distribution {input.custom_swd_distribution} \
+            --output_file {output.output_file}
+        """
+
+rule fine_tuning:
+    input:
+        FINE_TUNING_OUTPUTS
+    output:
+        output_file=f"set_hyperparameters/{TAG}/hyperparameters.json"
+    params:
+        logdir = TENSORBOARD_DIR,
+        model_list = MODELS
+    conda:
+        ENV
+    shell:
+        """
+        python gather_fine_tuning.py \
+            --input_dir {params.logdir} \
+            --output_file {output.output_file} \
+            --model_list {params.model_list}
         """
 
     

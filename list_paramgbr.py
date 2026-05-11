@@ -10,18 +10,18 @@ sub_file_template = ""
 
 counter = 0
 
-os.makedirs("hps/gbr", exist_ok=True)
+os.makedirs("hps/GBR", exist_ok=True)
 for n_estimator in n_estimators_list:
   for learning_rate in learning_rate_list:
     for max_depth in max_depth_list:
         for min_samples_leaf in min_samples_leaf_list:
             for loss_regularization in loss_regularization_list:
-                with open(f"hps/gbr/GBR_hp_{counter}.json", "w") as f:
+                with open(f"hps/GBR/GBR_hp_{counter}.json", "w") as f:
                     json.dump({"n_estimators": n_estimator, "learning_rate": learning_rate, "max_depth": max_depth, "min_samples_leaf": min_samples_leaf, "loss_regularization": loss_regularization}, f)
-                sub_file_template += f"/home/hep/tlt26/T2K_Rw/hps/gbr/GBR_hp_{counter}.json\n"
+                sub_file_template += f"/home/hep/tlt26/T2K_Rw/hps/GBR/GBR_hp_{counter}.json\n"
                 counter += 1
 
 sub_file_template += ")"
 
-with open("hps/gbr/GBR_job.sub", "w") as f:
+with open("hps/GBR/GBR_job.sub", "w") as f:
   f.write(sub_file_template)
