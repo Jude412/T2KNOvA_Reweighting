@@ -1,28 +1,57 @@
+# Reweighting for fake data studies
+
 This repository allows one to perform a reweighting analysis on any given Nuisance file. 
 
-[Initializing if you don't have conda installed]
-If you DO have conda installed, simply add --use-conda at the end of any command including snakemake.
+## Prerequisites
+
+### Environment
+
+If you DO have conda installed, simply add `--use-conda` at the end of any command including snakemake.
 If you DO NOT have conda installed, you should first create a virtual environment with the following command :
-    python3 -m venv .venv
-    source .venv/bin/activate
+```
+python3 -m venv .venv
+source .venv/bin/activate
+```
 and then install the necessary librairies with :
-    pip install -r requirements.txt
-Please use the snakemake commands WITHOUT --use-conda at the end
+```
+pip install -r requirements.txt
+```
+Please use the `snakemake` commands WITHOUT `--use-conda` at the end
+
+### Input files
 
 After cloning the repository, one should first download the input files. For example, the Neut and Genie files used in previous analysis were taken from:
-    -https://portal.nersc.gov/project/nuisance/MC_IOP_review/GENIEv3_G18_10b_00_000/, especially : T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root
-    -https://portal.nersc.gov/project/nuisance/MC_IOP_review/NEUT562/, especially : T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root
+- https://portal.nersc.gov/project/nuisance/MC_IOP_review/GENIEv3_G18_10b_00_000/, especially : T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root
+- https://portal.nersc.gov/project/nuisance/MC_IOP_review/NEUT562/, especially : T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root
 
-After downloading the needed files, one should place them in the appropriate directory (ex : GENIE_file and NEUT_file directory, but feel free to create your own directory). 
-Then, open the file named 'config.yaml', and change the 'neut_file' and 'genie_file' path to match the relative path of the files you want to reweight. Please note that the original distribution will be the one given to 'neut_file' and the target will be the one given to 'genie_file'.
-Also in the 'config.yaml' file, you can change several parameters for your analysis : 
+After downloading the needed files, one should place them in the appropriate directory (ex : `GENIE_file` and `NEUT_file` directory, but feel free to create your own directory). 
+Then, open the file named `config.yaml`, and change the `neut_file` and `genie_file` path to match the relative path of the files you want to reweight. Please note that the original distribution will be the one given to `neut_file` and the target will be the one given to `genie_file`.
 
-In the 'analysis' section, you can specify 
-    -the interaction mode number (default is 1 for CCQE), 
-    -the PDG number of the interacting neutrino (default is 14 for muon neutrino)
-    -the train_percentage which defines the amount of data that go into your training sample (default is 0.4, should be between 0 and 1)
-    -the val_percentage which defines the amount of data that go into your validation sample (default is 0.4, should be between 0 and 1)
-    Please make sure that the sum of the percentages does not exceed 1. (The amount of datat going into the test sample is automatically computed)
+Commands to download the files:
+```
+mkdir GENIE_file
+wget https://portal.nersc.gov/project/nuisance/MC_IOP_review/GENIEv3_G18_10b_00_000/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root GENIE_file/
+
+mkdir NEUT_file
+wget https://portal.nersc.gov/project/nuisance/MC_IOP_review/GENIEv3_G18_10b_00_000/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root NEUT_file/
+```
+
+## Quick Start
+
+```
+snakemake saved_figures/snakemake_test/5D/metrics.json --cores 8 --use-conda
+```
+
+## Configuration
+
+Also in the `config.yaml` file, you can change several parameters for your analysis : 
+
+In the `analysis` section, you can specify:
+- the interaction mode number (default is 1 for CCQE), 
+- the PDG number of the interacting neutrino (default is 14 for muon neutrino)
+- the train_percentage which defines the amount of data that go into your training sample (default is 0.4, should be between 0 and 1)
+- the val_percentage which defines the amount of data that go into your validation sample (default is 0.4, should be between 0 and 1)
+Please make sure that the sum of the percentages does not exceed 1. (The amount of datat going into the test sample is automatically computed)
 
 In the 'features'/'parameters_interest' section, you can specifiy the parameters that you want to use to train the different methods on.
 Please pick from the following list : ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"].
@@ -53,7 +82,9 @@ Please give as many sets as different method you want to train.
 Once all the above steps are completed, you are ready to run the analysis.
 To run a complete analysis, including samples creation, model training, metrics evaluation and plotting, enter the following command in your terminal: 
 
+```
 snakemake saved_figures/snakemake_test/{Dim}D/metrics.json --cores 8  (--use-conda  (only if you use conda))
+```
 
 where {Dim} should be replaced by the number of dimensions given in the 'dimensions'/'dim' section of the 'config.yaml' file.
 Once finished, you can explore the different 'saved' folders containing the samples, models, metrics and plots.

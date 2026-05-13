@@ -1,4 +1,4 @@
-.snakemake
+.snakemake/
 GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root
 NEUT_file/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root
 set_hyperparameters/potato_test
@@ -11,3 +11,4 @@ saved_weights/potato_test
 set_hyperparameters/potato_test
 TensorBoard/potato_test
 saved_figures/potato_test
+__pycache__/
