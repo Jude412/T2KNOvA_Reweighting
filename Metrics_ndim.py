@@ -16,8 +16,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 import mplhep as mh
 
 
-def plot_histograms(original, target, weights_dict, original_weights = None, target_weights = None, 
-                    xlabels = ["E_nu(GeV)", "E_lepton(GeV)", "cos_theta_lepton"], nbins = 30,
+def plot_histograms(original, target, weights_dict, dict_binning, original_weights = None, target_weights = None, 
+                    xlabels = ["E_nu(GeV)", "E_lepton(GeV)", "cos_theta_lepton"],
                     add_wass_distance = True, add_chi2 = True, output_file = "/home/hep/tlt26/T2K_Rw/Ndim/saved_figures/live.pdf"):
     """This function plots the original, reweighted and target distributions for each variable, with a ratio plot of the reweighted
       distribution over the target distribution. The weights_dict is a dictionary containing the predicted weights for each method, 
@@ -28,9 +28,12 @@ def plot_histograms(original, target, weights_dict, original_weights = None, tar
             #For the sake of the plots in this particular function, we use a binning that expands from the 1st to the 99th percentile 
             #of the target distribution.
             #Note that this might not be the best choice for a physical interpretation.
-            first_percentile = np.percentile(target[:, i], 1)
-            ninety_ninth_percentile = np.percentile(target[:, i], 99)
-            bins = np.linspace(first_percentile, ninety_ninth_percentile, nbins)
+            # first_percentile = np.percentile(target[:, i], 0)
+            # ninety_ninth_percentile = np.percentile(target[:, i], 99)
+            x_min = dict_binning[xlabels[i]]["x_min"]
+            x_max = dict_binning[xlabels[i]]["x_max"]
+            n_bins = dict_binning[xlabels[i]]["n_bins"]
+            bins = np.linspace(x_min, x_max, n_bins+1)
             bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
             # Getting the distributions and their uncertainties, with a normalization to the total number of events
@@ -64,6 +67,10 @@ def plot_histograms(original, target, weights_dict, original_weights = None, tar
                 original_rw_counts_list.append(original_rw_counts)
                 original_rw_counts_uncert_list.append(original_rw_uncertainty)
 
+
+            # print(np.sum(target_counts))
+            # print(np.sum(original_counts))
+            
             fig, (ax_main, ax_ratio) = plt.subplots(
                 2, 1, figsize=(8, 8), gridspec_kw={'height_ratios':[2,1], 'hspace': 0}, sharex=True
             )
@@ -83,8 +90,8 @@ def plot_histograms(original, target, weights_dict, original_weights = None, tar
 
             if add_chi2:
                 for key in weights_dict.keys():
-                    chi2 = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, nbins=nbins) / nbins
-                    chi2_values[key] = chi2
+                    chi2, dof = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, x_min=x_min, x_max=x_max, n_bins=n_bins)
+                    chi2_values[key] = chi2/dof if dof > 0 else 0
 
             # if text_str != "WD- \nChi2-":
             #     mh.add_text(text_str, ax = ax_main, loc = "over right", fontsize = 6)
@@ -253,10 +260,10 @@ def plot_2D_histogram(original, target, weights_dict, target_weights = None, xla
 
     return None
 
-def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, nbins = 100):
-    first_percentile = np.percentile(target[:, axis_number], 1)
-    ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
-    bins = np.linspace(first_percentile, ninety_ninth_percentile, nbins)
+def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, x_min=0, x_max=1, n_bins = 100):
+    # first_percentile = np.percentile(target[:, axis_number], 0)
+    # ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
+    bins = np.linspace(x_min, x_max, n_bins+1)
 
     if target_weights is not None:
         hist_target = np.histogram(target[:, axis_number], bins=bins, weights=target_weights/np.sum(target_weights))[0]
@@ -272,24 +279,30 @@ def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = N
     ## squared weights of our prediction in each bin.
     rw_weight_squared_sum = np.histogram(original[:, axis_number], bins=bins, weights=(rw_weights/np.sum(rw_weights))**2)[0]
     sigma2 = target_weights_squared_sum + rw_weight_squared_sum
-    chi2 = np.sum((hist_original_rw - hist_target) ** 2 / (sigma2))
-    
-    return chi2
+    mask = sigma2 > 0
+    chi2 = np.sum((hist_original_rw[mask] - hist_target[mask]) ** 2 / (sigma2[mask]))
+    dof = np.sum(mask)
+    return chi2, dof
 
-def chi2_hist_naxis(original, target, rw_weights, target_weights = None, nbins = 100):
+def chi2_hist_naxis(original, target, rw_weights, binning_dict, target_weights = None):
+    List_parameters = list(binning_dict.keys())
     n = original.shape[1]
     chi2 = 0
+    dof = 0
     for axis_number in range(n):
-        chi2 += chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, nbins = nbins)
-    return chi2
+        x_min = binning_dict[List_parameters[axis_number]]["x_min"]
+        x_max = binning_dict[List_parameters[axis_number]]["x_max"]
+        n_bins = binning_dict[List_parameters[axis_number]]["n_bins"]
+        chi2_val, dof_val = chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, x_min=x_min, x_max=x_max, n_bins=n_bins)
+        chi2 += chi2_val
+        dof += dof_val
+    return chi2, dof
 
-def chi2_dof(original, target, weights_dict, target_weights = None, nbins = 100):
+def chi2_dof(original, target, weights_dict, binning_dict, target_weights = None):
     dict_chi2 = {}
-    n = original.shape[1]
     for key in weights_dict.keys():
-        chi2 = chi2_hist_naxis(original, target, weights_dict[key], target_weights, nbins = nbins)
-        dof = n * nbins
-        dict_chi2[key] = chi2 / dof
+        chi2, dof = chi2_hist_naxis(original, target, weights_dict[key], binning_dict, target_weights)
+        dict_chi2[key] = chi2 / dof if dof > 0 else 0
     return dict_chi2
 
 

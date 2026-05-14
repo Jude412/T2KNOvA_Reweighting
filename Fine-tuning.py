@@ -21,15 +21,21 @@ if __name__ == "__main__":
                         default="/home/hep/tlt26/T2K_Rw/Ndim/saved_samples/3D/")
     args.add_argument('--sample_dir_8D', type=str, required=False, help='Directory where the 8D original and target samples are stored in csv format.',
                         default="/home/hep/tlt26/T2K_Rw/Ndim/saved_samples/8D/")
+    args.add_argument('--sample_dir_21D', type=str, required=False, help='Directory where the 21D original and target samples are stored in csv format.',
+                        default="/home/hep/tlt26/T2K_Rw/Ndim/saved_samples/21D/")
     args.add_argument('--model', type=str, required=True, choices=['binning', 'NN', 'GBR', 'XGB'], help='The reweighting model to train.')
     args.add_argument('--hyperparameters', type=str, required=True, help="Path to JSON file containing hyperparameters to train the XGBoost model.")
     args.add_argument('--logdir', type=str, required=False, default="/home/hep/tlt26/T2K_Rw/Ndim/TensorBoard/test_run2", help="The directory where the tensorboard log file will be saved.")
     args.add_argument("--custom_swd_distribution", type = str, help = "The distribution to compute the Training-dim SWD p-value for.")
     args.add_argument("--swd_distribution_3D", type = str, help = "The distribution to compute the 3D SWD p-value for.")
     args.add_argument("--swd_distribution_8D", type = str, help = "The distribution to compute the 8D SWD p-value for.")
+    args.add_argument("--swd_distribution_21D", type = str, help = "The distribution to compute the 21D SWD p-value for.")
+    args.add_argument("--binning_file", type=str, help="Path to the json file containing the binning information for each parameter.")
     args.add_argument("--output_file", type = str, help = "The path to the csv file where the hyperparameters and metrics will be saved in addition to the tensorboard log file.")
     args = args.parse_args()
     List_parameters = ["Enu_true","ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
+    List_parameters_21D = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode",
+                "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     # Load the data
 
     original_train = np.loadtxt(os.path.join(args.train_sample_dir, "original_train.csv"), delimiter=',')
@@ -40,19 +46,15 @@ if __name__ == "__main__":
     target_test = np.loadtxt(os.path.join(args.train_sample_dir, "target_test.csv"), delimiter=',')
 
     #we need this for the 3D/8D swd
-    original_train_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_train.csv"), delimiter=',')
-    target_train_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_train.csv"), delimiter=',')
-    original_val_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_val.csv"), delimiter=',')
-    target_val_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_val.csv"), delimiter=',')
     original_test_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "original_test.csv"), delimiter=',')
     target_test_3D = np.loadtxt(os.path.join(args.sample_dir_3D, "target_test.csv"), delimiter=',')
 
-    original_train_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_train.csv"), delimiter=',')
-    target_train_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_train.csv"), delimiter=',')
-    original_val_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_val.csv"), delimiter=',')
-    target_val_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_val.csv"), delimiter=',')
     original_test_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "original_test.csv"), delimiter=',')
     target_test_8D = np.loadtxt(os.path.join(args.sample_dir_8D, "target_test.csv"), delimiter=',')
+
+    original_test_21D = np.loadtxt(os.path.join(args.sample_dir_21D, "original_test.csv"), delimiter=',')
+    target_test_21D = np.loadtxt(os.path.join(args.sample_dir_21D, "target_test.csv"), delimiter=',')
+
 
     # Train the model
     
@@ -102,9 +104,15 @@ if __name__ == "__main__":
     dict_mean_swd_3D = compute_swd(original_test_3D, target_test_3D, weight_dict, n_directions = 500)
     list_swd_3D = np.load(args.swd_distribution_3D)
     p_value_3D = compute_p_value(dict_mean_swd_3D, list_swd_3D)[args.model]
-    dict_mean_swd_8D = compute_swd(original_test, target_test, weight_dict, n_directions = 500)
+
+    dict_mean_swd_8D = compute_swd(original_test_8D, target_test_8D, weight_dict, n_directions = 500)
     list_swd_8D = np.load(args.swd_distribution_8D)
     p_value_8D = compute_p_value(dict_mean_swd_8D, list_swd_8D)[args.model]
+
+    dict_mean_swd_21D = compute_swd(original_test_21D, target_test_21D, weight_dict, n_directions = 500)
+    list_swd_21D = np.load(args.swd_distribution_21D)
+    p_value_21D = compute_p_value(dict_mean_swd_21D, list_swd_21D)[args.model]
+
     dict_mean_swd_ndim = compute_swd(original_test, target_test, weight_dict, n_directions = 500)
     list_swd_ndim = np.load(args.custom_swd_distribution)
     p_value_ndim = compute_p_value(dict_mean_swd_ndim, list_swd_ndim)[args.model]
@@ -112,6 +120,7 @@ if __name__ == "__main__":
 
     swd_3d = dict_mean_swd_3D[args.model]
     swd_8d = dict_mean_swd_8D[args.model]
+    swd_21D = dict_mean_swd_21D[args.model]
     swd_ndim = dict_mean_swd_ndim[args.model]
 
     if args.model == 'binning':
@@ -120,6 +129,8 @@ if __name__ == "__main__":
             "p_value_3D": p_value_3D,
             "SWD_8D": swd_8d,
             "p_value_8D": p_value_8D,
+            "SWD_21D": swd_21D,
+            "p_value_21D": p_value_21D,
             f"SWD_{original_test.shape[1]}D": swd_ndim,
             f"p_value_{original_test.shape[1]}D": p_value_ndim
         }
@@ -138,6 +149,8 @@ if __name__ == "__main__":
             "p_value_3D": p_value_3D,
             "SWD_8D": swd_8d,
             "p_value_8D": p_value_8D,
+            "SWD_21D": swd_21D,
+            "p_value_21D": p_value_21D,
             f"SWD_{original_test.shape[1]}D": swd_ndim,
             f"p_value_{original_test.shape[1]}D": p_value_ndim
         }
@@ -148,6 +161,8 @@ if __name__ == "__main__":
             "p_value_3D": p_value_3D,
             "SWD_8D": swd_8d,
             "p_value_8D": p_value_8D,
+            "SWD_21D": swd_21D,
+            "p_value_21D": p_value_21D,
             f"SWD_{original_test.shape[1]}D": swd_ndim,
             f"p_value_{original_test.shape[1]}D": p_value_ndim
         }
@@ -165,20 +180,30 @@ if __name__ == "__main__":
             "p_value_3D": p_value_3D,
             "SWD_8D": swd_8d,
             "p_value_8D": p_value_8D,
+            "SWD_21D": swd_21D,
+            "p_value_21D": p_value_21D,
             f"SWD_{original_test.shape[1]}D": swd_ndim,
             f"p_value_{original_test.shape[1]}D": p_value_ndim
         }
 
-    for i in range(original_test_8D.shape[1]):
-        chi2_dof_1D = chi2_hist_axis(original_test_8D, target_test_8D, weight_dict[args.model], axis_number = i, nbins = 50) / 50
-        metrics[f"chi2_dof_{List_parameters[i]}"] = chi2_dof_1D
+    with open(args.binning_file, 'r') as f:
+        binning_dict = json.load(f)
 
-    metrics[f"chi2_dof_3D"] = chi2_dof(original_test_3D, target_test_3D, weight_dict, nbins = 50)[args.model]
-    metrics[f"chi2_dof_8D"] = chi2_dof(original_test_8D, target_test_8D, weight_dict, nbins = 50)[args.model]
-    metrics[f"chi2_dof_{original_test.shape[1]}D"] = chi2_dof(original_test, target_test, weight_dict, nbins = 50)[args.model]
+    for i in range(original_test_21D.shape[1]):
+        x_min = binning_dict[List_parameters_21D[i]]["x_min"]
+        x_max = binning_dict[List_parameters_21D[i]]["x_max"]
+        n_bins = binning_dict[List_parameters_21D[i]]["n_bins"]
+        chi2, dof = chi2_hist_axis(original_test_21D, target_test_21D, weight_dict[args.model], axis_number = i, x_min=x_min, x_max=x_max, n_bins=n_bins)
+        metrics[f"chi2_dof_{List_parameters_21D[i]}"] = chi2/dof if dof > 0 else 0
+
+    metrics[f"chi2_dof_3D"] = chi2_dof(original_test_3D, target_test_3D, weight_dict, binning_dict=binning_dict)[args.model]
+    metrics[f"chi2_dof_8D"] = chi2_dof(original_test_8D, target_test_8D, weight_dict, binning_dict=binning_dict)[args.model]
+    metrics[f"chi2_dof_21D"] = chi2_dof(original_test_21D, target_test_21D, weight_dict, binning_dict=binning_dict)[args.model]
+    metrics[f"chi2_dof_{original_test.shape[1]}D"] = chi2_dof(original_test, target_test, weight_dict, binning_dict=binning_dict)[args.model]
 
     print(f"p_value_3D : {p_value_3D}")
     print(f"p_value_8D : {p_value_8D}")
+    print(f"p_value_21D : {p_value_21D}")
     print(f"p_value_{original_test.shape[1]}D : {p_value_ndim}")
 
 

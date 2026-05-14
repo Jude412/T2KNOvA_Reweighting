@@ -8,3 +8,4 @@ pandas
 uproot
 awkward
 snakemake
+POT

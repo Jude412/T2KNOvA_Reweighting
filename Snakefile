@@ -7,6 +7,7 @@ TAG = config["output"]["tag"]
 DIM = config["dimensions"]["dim"]
 NUMBER_OF_SETS = config["models"]["number_model_hyperparameters_sets"]
 MODELS = config["models"]["model_list"]
+MODES = config["analysis"]["modes"]
 RUNS = range(200)
 
 INIT_SAMPLES_DIR = f"saved_samples/{TAG}/"
@@ -33,16 +34,19 @@ rule initialize_analysis:
         GENIEfile=config["paths"]["genie_file"]
     
     params:
-        mode=config["analysis"]["mode"],
-        neutrino_PDG=config["analysis"]["neutrino_PDG"],
+        modes=MODES,
+        # neutrino_PDG=config["analysis"]["neutrino_PDG"],
         train_percentage=config["analysis"]["train_percentage"],
         val_percentage=config["analysis"]["val_percentage"]
     
     output:
         samples_dir_3D=directory(INIT_SAMPLES_DIR + "3D/"),
         samples_dir_8D=directory(INIT_SAMPLES_DIR + "8D/"),
-        original_test = INIT_SAMPLES_DIR + "8D/original_test.csv",
-        target_test = INIT_SAMPLES_DIR + "8D/target_test.csv",
+        samples_dir_21D=directory(INIT_SAMPLES_DIR + "21D/"),
+        original_test_8D = INIT_SAMPLES_DIR + "8D/original_test.csv",
+        target_test_8D = INIT_SAMPLES_DIR + "8D/target_test.csv",
+        original_test_21D = INIT_SAMPLES_DIR + "21D/original_test.csv",
+        target_test_21D = INIT_SAMPLES_DIR + "21D/target_test.csv",
         last_sampled_file_3D = INIT_SAMPLES_DIR + "3D/target_test.csv"
 
     conda:
@@ -53,12 +57,12 @@ rule initialize_analysis:
         python Init.py \
             --input_file_NEUT {input.NEUTfile} \
             --input_file_GENIE {input.GENIEfile} \
-            --mode {params.mode} \
-            --neutrino_PDG {params.neutrino_PDG} \
+            --modes {params.modes} \
             --train_percentage {params.train_percentage} \
             --val_percentage {params.val_percentage} \
             --output_dir_samples_3D {output.samples_dir_3D} \
-            --output_dir_samples_8D {output.samples_dir_8D} 
+            --output_dir_samples_8D {output.samples_dir_8D} \
+            --output_dir_samples_21D {output.samples_dir_21D} 
         """
 
 
@@ -125,14 +129,45 @@ rule aggregate_bootstrap_8D:
             --output {output.final_file}
         """
 
+rule run_initial_bootstrap_21D:
+    input:
+        samples_dir=INIT_SAMPLES_DIR + "21D/" + "target_test.csv",
+        last_sampled_file = INIT_SAMPLES_DIR + "21D/target_test.csv"
+    output:
+        output_file=INIT_SWD_DIR + "21D/indiv_bootstrap/run_{run_id}.npy"
+    conda:
+        ENV
+    shell:
+        """
+        python Bootstrap_swd.py \
+            --distribution {input.samples_dir} \
+            --output_dir {INIT_SWD_DIR}21D/indiv_bootstrap/ \
+            --output_file {output.output_file} \
+            --random_seed {wildcards.run_id}
+        """
+
+rule aggregate_bootstrap_21D:
+    input:
+        expand(INIT_SWD_DIR + "21D/indiv_bootstrap/run_{run_id}.npy", run_id=RUNS)
+    output:
+        final_file=INIT_SWD_DIR + "21D/swd_distribution_21D.npy"
+    conda:
+        ENV
+    shell:
+        """
+        python aggregate.py \
+            --input {input} \
+            --output {output.final_file}
+        """
+
 rule custom_dim_analysis:
     input:
         NEUTfile=config["paths"]["neut_file"],
         GENIEfile=config["paths"]["genie_file"]
     
     params:
-        mode=config["analysis"]["mode"],
-        neutrino_PDG=config["analysis"]["neutrino_PDG"],
+        modes=MODES,
+        # neutrino_PDG=config["analysis"]["neutrino_PDG"],
         train_percentage=config["analysis"]["train_percentage"],
         val_percentage=config["analysis"]["val_percentage"],
         parameters_interest=config["features"]["parameters_interest"],
@@ -148,8 +183,7 @@ rule custom_dim_analysis:
         python Splitting-script.py \
             --input_file_NEUT {input.NEUTfile} \
             --input_file_GENIE {input.GENIEfile} \
-            --mode {params.mode} \
-            --neutrino_PDG {params.neutrino_PDG} \
+            --modes {params.modes} \
             --train_percentage {params.train_percentage} \
             --val_percentage {params.val_percentage} \
             --parameters_interest {params.parameters_interest} \
@@ -192,14 +226,17 @@ rule single_fine_tuning:
         train_samples_dir = SAMPLES_DIR,
         init_samples_dir_3D = INIT_SAMPLES_DIR + "3D/",
         init_samples_dir_8D = INIT_SAMPLES_DIR + "8D/",
+        init_samples_dir_21D = INIT_SAMPLES_DIR + "21D/",
         hparam_file = HPS_DIR + "{model}/{model}_hp_{run_id}.json",
         swd_distribution_3D = INIT_SWD_DIR + "3D/swd_distribution_3D.npy",
         swd_distribution_8D = INIT_SWD_DIR + "8D/swd_distribution_8D.npy",
+        swd_distribution_21D = INIT_SWD_DIR + "21D/swd_distribution_21D.npy",
         custom_swd_distribution = SWD_DIR + f"swd_distribution_{DIM}D.npy"
 
     params:
         model = "{model}",
-        logdir = TENSORBOARD_DIR + "{model}/"
+        logdir = TENSORBOARD_DIR + "{model}/",
+        binning_file = config["features"]["binning_file"]
     
     output:
         output_file = TENSORBOARD_DIR + "{model}/run_{run_id}_metrics.csv"
@@ -213,12 +250,15 @@ rule single_fine_tuning:
             --train_sample_dir {input.train_samples_dir} \
             --sample_dir_3D {input.init_samples_dir_3D} \
             --sample_dir_8D {input.init_samples_dir_8D} \
+            --sample_dir_21D {input.init_samples_dir_21D} \
             --swd_distribution_3D {input.swd_distribution_3D} \
             --swd_distribution_8D {input.swd_distribution_8D} \
+            --swd_distribution_21D {input.swd_distribution_21D} \
             --model {params.model} \
             --hyperparameters {input.hparam_file} \
             --logdir {params.logdir} \
             --custom_swd_distribution {input.custom_swd_distribution} \
+            --binning_file {params.binning_file} \
             --output_file {output.output_file}
         """
 
@@ -276,11 +316,12 @@ rule train_models:
 
 rule compute_metrics_plots:
     input:
-        original_test = INIT_SAMPLES_DIR + "8D/original_test.csv",
-        target_test = INIT_SAMPLES_DIR + "8D/target_test.csv",
+        original_test = INIT_SAMPLES_DIR + "21D/original_test.csv",
+        target_test = INIT_SAMPLES_DIR + "21D/target_test.csv",
         weights_path = WEIGHTS_DIR + f"weights_path_dict_{DIM}D.json",
         swd_dist_file_3D = INIT_SWD_DIR + "3D/swd_distribution_3D.npy",
         swd_dist_file_8D = INIT_SWD_DIR + "8D/swd_distribution_8D.npy",
+        swd_dist_file_21D = INIT_SWD_DIR + "21D/swd_distribution_21D.npy",
         swd_dist_file = SWD_DIR + f"swd_distribution_{DIM}D.npy"
         
     output:
@@ -288,7 +329,8 @@ rule compute_metrics_plots:
         metrics_file=FIG_DIR + "metrics.json"
     
     params:
-        parameters_interest=config["features"]["parameters_interest"]
+        parameters_interest=config["features"]["parameters_interest"],
+        binning_file = config["features"]["binning_file"]
     
     conda:
         ENV
@@ -307,7 +349,9 @@ rule compute_metrics_plots:
             --interest_params {params.parameters_interest} \
             --custom_swd_distribution {input.swd_dist_file} \
             --swd_distribution_3D {input.swd_dist_file_3D} \
-            --swd_distribution_8D {input.swd_dist_file_8D}
+            --swd_distribution_8D {input.swd_dist_file_8D} \
+            --swd_distribution_21D {input.swd_dist_file_21D} \
+            --binning_file {params.binning_file}
         """
 
 rule all:

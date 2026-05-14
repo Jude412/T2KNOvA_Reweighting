@@ -3,8 +3,8 @@ SWD distribution for the target_test 3D and 8D samples. The sampels are saved in
 saved in the "saved_swd_distribution + --output_dir" directory."""
 
 # Imports 
-from NEUTFile_conv_ndim import convert_NEUT_input_file_ndim
-from GENIEFile_conv_ndim import convert_GENIE_input_file_ndim
+from NEUTFile_conv_ndim import convert_NEUT_input_file_ndim, convert_NEUT_input_file_alldim
+from GENIEFile_conv_ndim import convert_GENIE_input_file_ndim, convert_GENIE_input_file_alldim
 from Sample_creation import create_samples
 import numpy as np
 import argparse
@@ -16,10 +16,10 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/NEUT_file/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root")
     argparser.add_argument("--input_file_GENIE", required=False, type=str, help="Path to the input ROOT file from Nuisance (that used GENIE as generator).",
                            default="/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root")
-    argparser.add_argument("--mode", type=int, help="Interaction mode to select (e.g. 1 for CCQE).",
-                           required=False, default=1)
-    argparser.add_argument("--neutrino_PDG", type=int, help="PDG code of the neutrino type to select (e.g. 14 for numu).", 
-                           required=False, default = 14)
+    argparser.add_argument("--modes", type=int, nargs="+", help="Interaction modes to select (e.g. 1 for CCQE).",
+                           required=False, default=[1])
+    # argparser.add_argument("--neutrino_PDG", type=int, help="PDG code of the neutrino type to select (e.g. 14 for numu).", 
+    #                        required=False, default = 14)
     argparser.add_argument("--train_percentage", type=float, help="Percentage of the training sample (between 0 and 1).",
                            required=False, default=0.4)
     argparser.add_argument("--val_percentage", type=float, help="Percentage of the validation sample (between 0 and 1).",
@@ -30,19 +30,38 @@ if __name__ == "__main__":
                             default="/home/hep/tlt26/RW_Snakemake/saved_samples/first_test/3D/")
     argparser.add_argument("--output_dir_samples_8D", required=False, type=str, help="Path to the output directory where the splitted samples will be saved.",
                             default="/home/hep/tlt26/RW_Snakemake/saved_samples/first_test/8D/")
+    argparser.add_argument("--output_dir_samples_21D", required=False, type=str, help="Path to the output directory where the splitted samples will be saved.",
+                            default="/home/hep/tlt26/RW_Snakemake/saved_samples/first_test/21D/")
     args = argparser.parse_args()
 
     # Getting data from the files
     print("Getting data from the files...")
     List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
-    original_8D = convert_NEUT_input_file_ndim(args.input_file_NEUT, mode = args.mode, neutrino_PDG = args.neutrino_PDG, list_parameters = List_parameters)
-    target_8D = convert_GENIE_input_file_ndim(args.input_file_GENIE, mode = args.mode, neutrino_PDG = args.neutrino_PDG, list_parameters = List_parameters)
+    List_parameters_21D = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode",
+                "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
+    List_all_params = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
+                 "PDGnu", "Mode", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
+    Index_21D_params = [List_all_params.index(param) for param in List_parameters_21D]
+    Index_8D_params = [List_all_params.index(param) for param in List_parameters]
+    Index_3D_params = [List_all_params.index(param) for param in List_parameters[:3]]
 
-    original_3D = original_8D[:, :3]
-    target_3D = target_8D[:, :3]
+    original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes)
+    target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes)
+
+    original_21D = original[:, Index_21D_params]
+    target_21D = target[:, Index_21D_params]
+
+    original_8D = original[:, Index_8D_params]
+    target_8D = target[:, Index_8D_params]
+
+    original_3D = original[:, Index_3D_params]
+    target_3D = target[:, Index_3D_params]
 
     # Splitting data
     print("Splitting data into training, validation and test samples...")
+    original_train, original_val, original_test = create_samples(original_21D, args.train_percentage, args.val_percentage, args.random_seeds[0])
+    target_train, target_val, target_test = create_samples(target_21D, args.train_percentage, args.val_percentage, args.random_seeds[1])
+
     original_8D_train, original_8D_val, original_8D_test = create_samples(original_8D, args.train_percentage, args.val_percentage, args.random_seeds[0])
     target_8D_train, target_8D_val, target_8D_test = create_samples(target_8D, args.train_percentage, args.val_percentage, args.random_seeds[1])
 
@@ -52,6 +71,14 @@ if __name__ == "__main__":
     # We save the splitted samples as csv files
     os.makedirs(os.path.join(args.output_dir_samples_3D), exist_ok=True)
     os.makedirs(os.path.join(args.output_dir_samples_8D), exist_ok=True)
+    os.makedirs(os.path.join(args.output_dir_samples_21D), exist_ok=True)
+
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_train.csv"), original_train, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_val.csv"), original_val, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_test.csv"), original_test, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_train.csv"), target_train, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_val.csv"), target_val, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_test.csv"), target_test, delimiter=",", header=",".join(List_parameters_21D))
 
     np.savetxt(os.path.join(args.output_dir_samples_8D, "original_train.csv"), original_8D_train, delimiter=",", header=",".join(List_parameters))
     np.savetxt(os.path.join(args.output_dir_samples_8D, "original_val.csv"), original_8D_val, delimiter=",", header=",".join(List_parameters))

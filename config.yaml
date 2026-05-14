@@ -3,7 +3,10 @@ paths:
   genie_file: "/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root"
 
 analysis:
-  mode: 1
+  modes: 
+    - 1
+    - 11
+
   neutrino_PDG: 14
   train_percentage: 0.4
   val_percentage: 0.4
@@ -15,12 +18,23 @@ features:
     - CosLep
     - W
     - Eav
+    - Mode
+    - N_n
+    - K_n
+    - N_p
+    - K_p
+    - N_pi0
+    - K_pi0
+    - N_pip
+    - K_pip
+    - N_pim
+    - K_pim
+  
+  binning_file: "/home/hep/tlt26/RW_Snakemake/binnings.json"
+
 
 models:
   model_list:
-    - binning
-    - NN
-    - GBR
     - XGB
   
   number_model_hyperparameters_sets:
@@ -31,7 +45,7 @@ models:
     
 
 dimensions:
-  dim: 5
+  dim: 16
 
 output:
-  tag: "potato_test"
+  tag: "16D_mode1_11"

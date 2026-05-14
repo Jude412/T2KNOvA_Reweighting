@@ -5,8 +5,8 @@ The output samples are numpy arrays that will be used to train the reweighting t
 They are saved as csv files in a specified directory. The script can be run from the command line with the appropriate arguments."""
 
 #imports 
-from NEUTFile_conv_ndim import convert_NEUT_input_file_ndim
-from GENIEFile_conv_ndim import convert_GENIE_input_file_ndim
+from NEUTFile_conv_ndim import convert_NEUT_input_file_ndim, convert_NEUT_input_file_alldim
+from GENIEFile_conv_ndim import convert_GENIE_input_file_ndim, convert_GENIE_input_file_alldim
 from Sample_creation import create_samples
 import numpy as np
 import argparse
@@ -18,8 +18,8 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/NEUT_file/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root")
     argparser.add_argument("--input_file_GENIE", required=False, type=str, help="Path to the input ROOT file from Nuisance (that used GENIE as generator).",
                            default="/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root")
-    argparser.add_argument("--mode", type=int, required=False, help="Interaction mode to select (e.g. 1 for CCQE).", default=1)
-    argparser.add_argument("--neutrino_PDG", type=int, required=False, help="PDG code of the neutrino type to select (e.g. 14 for numu).", default = 14)
+    argparser.add_argument("--modes", type=int, nargs="+", required=False, help="Interaction modes to select (e.g. 1 for CCQE).", default=[1] )
+    # argparser.add_argument("--neutrino_PDG", type=int, required=False, help="PDG code of the neutrino type to select (e.g. 14 for numu).", default = 14)
     argparser.add_argument("--train_percentage", type=float, required=False, help="Percentage of the training sample (between 0 and 1).", default=0.4)
     argparser.add_argument("--val_percentage", type=float, required=False, help="Percentage of the validation sample (between 0 and 1).", default=0.4)
     argparser.add_argument("--random_seeds", type = list, required=False, 
@@ -32,10 +32,11 @@ if __name__ == "__main__":
 
     # Getting data from the files
     print("Getting data from the files...")
-    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
+    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
+                 "PDGnu", "Mode", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     Params_of_interest = args.parameters_interest
-    original_load = convert_NEUT_input_file_ndim(args.input_file_NEUT, mode = args.mode, neutrino_PDG = args.neutrino_PDG, list_parameters = List_parameters)
-    target_load = convert_GENIE_input_file_ndim(args.input_file_GENIE, mode = args.mode, neutrino_PDG = args.neutrino_PDG, list_parameters = List_parameters)
+    original_load = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes)
+    target_load = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes)
 
     original = original_load[:, [List_parameters.index(param) for param in Params_of_interest]]
     target = target_load[:, [List_parameters.index(param) for param in Params_of_interest]]
