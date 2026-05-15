@@ -5,7 +5,6 @@ paths:
 analysis:
   modes: 
     - 1
-    - 11
 
   neutrino_PDG: 14
   train_percentage: 0.4
@@ -14,10 +13,9 @@ analysis:
 features:
   parameters_interest:
     - Enu_true
-    - ELep
-    - CosLep
+    - Q2
     - W
-    - Eav
+    - y
     - Mode
     - N_n
     - K_n
@@ -45,7 +43,7 @@ models:
     
 
 dimensions:
-  dim: 16
+  dim: 15
 
 output:
-  tag: "16D_mode1_11"
+  tag: "15D_mode1_novaparam"

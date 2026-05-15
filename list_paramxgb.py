@@ -1,7 +1,7 @@
 import json
 import os
 n_estimators_list = [100, 150, 200]
-max_depth_list = [3, 4, 5, 6, 7]
+max_depth_list = [3, 5, 6, 7, 9]
 learning_rate_list = [0.01, 0.05, 0.075, 0.1, 0.2]
 subsample_list = [0.5, 1]
 gamma_list = [0]
