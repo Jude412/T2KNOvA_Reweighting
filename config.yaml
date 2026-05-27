@@ -5,6 +5,31 @@ paths:
 analysis:
   modes: 
     - 1
+    - 2
+    - 11
+    - 12
+    - 13
+    - 16
+    - 17
+    - 21
+    - 22
+    - 23
+    - 26
+    - 31
+    - 32
+    - 33
+    - 34
+    - 36
+    - 38
+    - 39
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 51
+    - 52
 
   neutrino_PDG: 14
   train_percentage: 0.4
@@ -13,20 +38,10 @@ analysis:
 features:
   parameters_interest:
     - Enu_true
-    - Q2
+    - ELep
+    - CosLep
     - W
-    - y
-    - Mode
-    - N_n
-    - K_n
-    - N_p
-    - K_p
-    - N_pi0
-    - K_pi0
-    - N_pip
-    - K_pip
-    - N_pim
-    - K_pim
+    - Eav
   
   binning_file: "/home/hep/tlt26/RW_Snakemake/binnings.json"
 
@@ -43,7 +58,7 @@ models:
     
 
 dimensions:
-  dim: 15
+  dim: 5
 
 output:
-  tag: "15D_mode1_novaparam"
+  tag: "5D_all_modes"

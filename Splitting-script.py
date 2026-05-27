@@ -32,14 +32,14 @@ if __name__ == "__main__":
 
     # Getting data from the files
     print("Getting data from the files...")
-    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
-                 "PDGnu", "Mode", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
+    List_all_params = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
+                 "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     Params_of_interest = args.parameters_interest
     original_load = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes)
     target_load = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes)
 
-    original = original_load[:, [List_parameters.index(param) for param in Params_of_interest]]
-    target = target_load[:, [List_parameters.index(param) for param in Params_of_interest]]
+    original = original_load[:, [List_all_params.index(param) for param in Params_of_interest]]
+    target = target_load[:, [List_all_params.index(param) for param in Params_of_interest]]
 
     # We split the data into a training and validation set
     print("Splitting data into training, validation and test samples...")

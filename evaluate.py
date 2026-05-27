@@ -7,6 +7,7 @@ It returns 1D histograms with ratio of reweighting data over target, a Chi2 stat
 import os
 import pickle
 import numpy as np
+import matplotlib.pyplot as plt
 import argparse
 import json
 from Metrics_ndim import chi2_hist_axis, plot_histograms, chi2_dof, compute_swd, compute_p_value
@@ -37,6 +38,7 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/binnings.json")
     argparser.add_argument('--output_path', type=str, required=False, help='Path to save the output plots and metrics.',
                             default='/home/hep/tlt26/RW_Snakemake/Saved_evaluation/trained_1_11_eval_11/')
+    argparser.add_argument('--param_trained', type=str, nargs='+', required=False, help='Name of the parameter on which the model was trained')
     args = argparser.parse_args()
 
     List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode",
@@ -112,6 +114,62 @@ if __name__ == "__main__":
     
     with open(os.path.join(args.output_path, "metrics.json"), 'w') as f:
         json.dump(metrics_dict, f, indent=4)
+
+    with open(args.original_test, 'r') as f:
+        header = f.readline().strip().split(",")
+    
+    if "Mode" in header:
+        mode_values = np.unique(original_test[:, header.index("Mode")]).astype(int)
+        average_chi2_dof_3D_per_mode = np.zeros(int(max(mode_values)+1))
+        average_chi2_dof_8D_per_mode = np.zeros(int(max(mode_values)+1))
+        average_chi2_dof_per_mode = {}
+        for mode in mode_values:
+            original_mode = original_test[original_test[:, header.index("Mode")] == mode]
+            target_mode = target_test[target_test[:, header.index("Mode")] == mode]
+            weights_mode = predict_XGB(original_mode[:, :6], model)
+            weights_dict_mode = {"XGB": weights_mode}
+            chi2_3D_mode = chi2_dof(original_mode[:, :3], target_mode[:, :3], weights_dict=weights_dict_mode, binning_dict=binning_dict)["XGB"]
+            chi2_8D_mode = chi2_dof(original_mode[:, :8], target_mode[:, :8], weights_dict=weights_dict_mode, binning_dict=binning_dict)["XGB"]
+            average_chi2_dof_3D_per_mode[int(mode)] = chi2_3D_mode
+            average_chi2_dof_8D_per_mode[int(mode)] = chi2_8D_mode
+            average_chi2_dof_per_mode['Mode_'+str(mode)] = {'chi2_3D': chi2_3D_mode, 'chi2_8D': chi2_8D_mode}
+        with open(os.path.join(args.output_path, "average_chi2_dof_per_mode.json"), 'w') as f:
+            json.dump(average_chi2_dof_per_mode, f, indent=4)
+
+        modes = np.arange(int(max(mode_values)+1))
+
+        plt.bar(modes - 0.2, average_chi2_dof_3D_per_mode,
+                width=0.4, label="3D")
+
+        plt.bar(modes + 0.2, average_chi2_dof_8D_per_mode,
+                width=0.4, label="8D")
+
+        plt.xlabel("Mode")
+        plt.ylabel("Average Chi2/dof")
+        plt.legend()
+
+        plt.savefig(os.path.join(args.output_path,
+                                "average_chi2_dof_per_mode.png"))
+
+        plt.clf()
+
+    diff_chi2_dof_per_param = {}
+    for i, param in enumerate(args.param_trained):
+        chi2_diff_per_param = chi2_dict["Unweighted"][param] - chi2_dict["XGB"][param]
+        diff_chi2_dof_per_param[param] = chi2_diff_per_param
+
+    sortex_idx_by_importance = model.feature_importances_.argsort()[::-1] #importance derived from average loss gain
+    sorted_chi2_diff_per_param = {param: diff_chi2_dof_per_param[param] for param in np.array(args.param_trained)[sortex_idx_by_importance]}
+    plt.bar(np.arange(len(args.param_trained)), list(sorted_chi2_diff_per_param.values()), tick_label=list(sorted_chi2_diff_per_param.keys()))
+    plt.xticks(rotation=90)
+    plt.ylabel("Chi2/dof Unweighted - Chi2/dof XGB")
+    plt.title("Difference in Chi2/dof between Unweighted and XGB sorted by parameter importance (descending gain)")
+
+    plt.savefig(os.path.join(args.output_path, "chi2_dof_diff_per_param.png"))
+    with open(os.path.join(args.output_path, "diff_chi2_dof_per_param.json"), 'w') as f:
+        json.dump(sorted_chi2_diff_per_param, f, indent=4)
+    
+
 
     
 

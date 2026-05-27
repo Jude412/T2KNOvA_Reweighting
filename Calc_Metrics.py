@@ -42,10 +42,10 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/binnings.json")
     args = argparser.parse_args()
 
-    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode",
+    List_all_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     
-    Index_parameters = [List_parameters.index(param) for param in args.interest_params]
+    Index_parameters = [List_all_parameters.index(param) for param in args.interest_params]
 
     # We load the data and the weights
     original_test = np.loadtxt(args.original_test, delimiter=",")
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     if args.make_1D_plots:
         plot_histograms(original_test, target_test, weights_dict,
                         dict_binning=binning_dict,
-                        xlabels = List_parameters, 
+                        xlabels = List_all_parameters, 
                         output_file=os.path.join(args.output_file, "1Dhist.pdf"))
     
     if args.make_2D_plots:
@@ -84,8 +84,8 @@ if __name__ == "__main__":
         chi2_dict = {}
         for key in weights_dict.keys():
             chi2_dim = {}
-            for param in List_parameters:
-                param_index = List_parameters.index(param)
+            for param in List_all_parameters:
+                param_index = List_all_parameters.index(param)
                 x_min, x_max = binning_dict[param]["x_min"], binning_dict[param]["x_max"]
                 n_bins = binning_dict[param]["n_bins"]
                 chi2_val, dof = chi2_hist_axis(original_test, target_test, weights_dict[key], param_index, x_min=x_min, x_max=x_max, n_bins=n_bins)  

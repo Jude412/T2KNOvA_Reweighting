@@ -36,14 +36,13 @@ if __name__ == "__main__":
 
     # Getting data from the files
     print("Getting data from the files...")
-    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
-    List_parameters_21D = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode",
+    List_parameters_analysis = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     List_all_params = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
-                 "PDGnu", "Mode", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
-    Index_21D_params = [List_all_params.index(param) for param in List_parameters_21D]
-    Index_8D_params = [List_all_params.index(param) for param in List_parameters]
-    Index_3D_params = [List_all_params.index(param) for param in List_parameters[:3]]
+                 "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
+    Index_21D_params = [List_all_params.index(param) for param in List_parameters_analysis]
+    Index_8D_params = [List_all_params.index(param) for param in List_parameters_analysis[:8]]
+    Index_3D_params = [List_all_params.index(param) for param in List_parameters_analysis[:3]]
 
     original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes)
     target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes)
@@ -73,19 +72,19 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(args.output_dir_samples_8D), exist_ok=True)
     os.makedirs(os.path.join(args.output_dir_samples_21D), exist_ok=True)
 
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_train.csv"), original_train, delimiter=",", header=",".join(List_parameters_21D))
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_val.csv"), original_val, delimiter=",", header=",".join(List_parameters_21D))
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_test.csv"), original_test, delimiter=",", header=",".join(List_parameters_21D))
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_train.csv"), target_train, delimiter=",", header=",".join(List_parameters_21D))
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_val.csv"), target_val, delimiter=",", header=",".join(List_parameters_21D))
-    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_test.csv"), target_test, delimiter=",", header=",".join(List_parameters_21D))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_train.csv"), original_train, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_val.csv"), original_val, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "original_test.csv"), original_test, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_train.csv"), target_train, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_val.csv"), target_val, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_21D, "target_test.csv"), target_test, delimiter=",", header=",".join(List_parameters_analysis))
 
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_train.csv"), original_8D_train, delimiter=",", header=",".join(List_parameters))
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_val.csv"), original_8D_val, delimiter=",", header=",".join(List_parameters))
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_test.csv"), original_8D_test, delimiter=",", header=",".join(List_parameters))
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_train.csv"), target_8D_train, delimiter=",", header=",".join(List_parameters))
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_val.csv"), target_8D_val, delimiter=",", header=",".join(List_parameters))
-    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_test.csv"), target_8D_test, delimiter=",", header=",".join(List_parameters))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_train.csv"), original_8D_train, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_val.csv"), original_8D_val, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "original_test.csv"), original_8D_test, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_train.csv"), target_8D_train, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_val.csv"), target_8D_val, delimiter=",", header=",".join(List_parameters_analysis))
+    np.savetxt(os.path.join(args.output_dir_samples_8D, "target_test.csv"), target_8D_test, delimiter=",", header=",".join(List_parameters_analysis))
 
     np.savetxt(os.path.join(args.output_dir_samples_3D, "original_train.csv"), original_3D_train, delimiter=",", header="Enu_true,ELep,CosLep")
     np.savetxt(os.path.join(args.output_dir_samples_3D, "original_val.csv"), original_3D_val, delimiter=",", header="Enu_true,ELep,CosLep")
