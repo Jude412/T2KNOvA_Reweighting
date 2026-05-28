@@ -18,6 +18,8 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root")
     argparser.add_argument("--modes", type=int, nargs="+", help="Interaction modes to select (e.g. 1 for CCQE).",
                            required=False, default=[1])
+    argparser.add_argument("--modes_v2", type=int, nargs="+", help="Interaction modes v2 to select (e.g. 1 for CCQE).",
+                           required=False, default=[1])
     # argparser.add_argument("--neutrino_PDG", type=int, help="PDG code of the neutrino type to select (e.g. 14 for numu).", 
     #                        required=False, default = 14)
     argparser.add_argument("--train_percentage", type=float, help="Percentage of the training sample (between 0 and 1).",
@@ -44,8 +46,8 @@ if __name__ == "__main__":
     Index_8D_params = [List_all_params.index(param) for param in List_parameters_analysis[:8]]
     Index_3D_params = [List_all_params.index(param) for param in List_parameters_analysis[:3]]
 
-    original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes)
-    target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes)
+    original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes, modes_v2 = args.modes_v2)
+    target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes, modes_v2 = args.modes_v2)
 
     original_21D = original[:, Index_21D_params]
     target_21D = target[:, Index_21D_params]

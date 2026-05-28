@@ -35,7 +35,7 @@ def convert_GENIE_input_file_ndim(input_file, mode, neutrino_PDG, list_parameter
     else:
         return data
     
-def convert_GENIE_input_file_alldim(input_file, modes = None):
+def convert_GENIE_input_file_alldim(input_file, modes = None, modes_v2 = None):
     """This function takes as input a ROOT FlatTree from Nuisance and returns an array containing all the parameters of interest.
     They are : E_nu, E_lep, cos(theta_lep), Q2, q0, q3, W, Eav, y, neutrino PDG, interaction, mode, charged current,
     hit nucleus atomic number, hit nucleon PDG, multiplicity of final state proton, neutron, pions and the sum of their kinetic energies. """
@@ -116,6 +116,16 @@ def convert_GENIE_input_file_alldim(input_file, modes = None):
                                 ak.where(mask_CCNpi, 3,
                                     ak.where(mask_CCOther, 4,
                                         5)))))
+    
+    # cut the tree to the desired modes_v2 if desired
+
+    if modes_v2 is not None:
+        mask = False
+        for m in modes_v2:
+            mask = mask | (tree["Mode_v2"] == m)
+
+        tree = tree[mask]
+
     # we now create the final array containing the parameters of interest
     param_values = []
     for param in List_final_params:

@@ -8,6 +8,7 @@ DIM = config["dimensions"]["dim"]
 NUMBER_OF_SETS = config["models"]["number_model_hyperparameters_sets"]
 MODELS = config["models"]["model_list"]
 MODES = config["analysis"]["modes"]
+MODES_v2 = config["analysis"]["modes_v2"]
 RUNS = range(200)
 
 INIT_SAMPLES_DIR = f"saved_samples/{TAG}/"
@@ -35,6 +36,7 @@ rule initialize_analysis:
     
     params:
         modes=MODES,
+        modes_v2=MODES_v2,
         # neutrino_PDG=config["analysis"]["neutrino_PDG"],
         train_percentage=config["analysis"]["train_percentage"],
         val_percentage=config["analysis"]["val_percentage"]
@@ -58,6 +60,7 @@ rule initialize_analysis:
             --input_file_NEUT {input.NEUTfile} \
             --input_file_GENIE {input.GENIEfile} \
             --modes {params.modes} \
+            --modes_v2 {params.modes_v2} \
             --train_percentage {params.train_percentage} \
             --val_percentage {params.val_percentage} \
             --output_dir_samples_3D {output.samples_dir_3D} \
@@ -167,6 +170,7 @@ rule custom_dim_analysis:
     
     params:
         modes=MODES,
+        modes_v2=MODES_v2,
         # neutrino_PDG=config["analysis"]["neutrino_PDG"],
         train_percentage=config["analysis"]["train_percentage"],
         val_percentage=config["analysis"]["val_percentage"],
@@ -184,6 +188,7 @@ rule custom_dim_analysis:
             --input_file_NEUT {input.NEUTfile} \
             --input_file_GENIE {input.GENIEfile} \
             --modes {params.modes} \
+            --modes_v2 {params.modes_v2} \
             --train_percentage {params.train_percentage} \
             --val_percentage {params.val_percentage} \
             --parameters_interest {params.parameters_interest} \

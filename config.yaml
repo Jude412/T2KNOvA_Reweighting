@@ -31,6 +31,14 @@ analysis:
     - 51
     - 52
 
+  modes_v2:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+
   neutrino_PDG: 14
   train_percentage: 0.4
   val_percentage: 0.4
@@ -42,6 +50,7 @@ features:
     - CosLep
     - W
     - Eav
+    - Mode_v2
   
   binning_file: "/home/hep/tlt26/RW_Snakemake/binnings.json"
 
@@ -58,7 +67,7 @@ models:
     
 
 dimensions:
-  dim: 5
+  dim: 6
 
 output:
-  tag: "5D_all_modes"
+  tag: "6D_5DModev2_all_modes"
