@@ -39,7 +39,7 @@ models:
     binning: 24
     NN: 240
     GBR: 270
-    XGB : 150
+    XGB : 50
     
 
 dimensions:

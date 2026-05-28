@@ -147,8 +147,7 @@ def train_XGB(original_train, original_val, target_train, target_val,
     bst.fit(
         X_train, Y_train,
         eval_set=[(X_val, Y_val), (X_train, Y_train)],
-        verbose=True,
-        early_stopping_rounds = hparams["early_stopping_rounds"]
+        verbose=False
     )
 
     return bst
