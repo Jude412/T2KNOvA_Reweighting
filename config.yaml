@@ -39,11 +39,11 @@ models:
     binning: 24
     NN: 240
     GBR: 270
-    XGB : 50
+    XGB : 384
     
 
 dimensions:
   dim: 5
 
 output:
-  tag: "5D_Mode1_early_stopping"
+  tag: "5D_Mode1_early_stopping_extra2"
