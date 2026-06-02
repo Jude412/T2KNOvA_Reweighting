@@ -93,7 +93,9 @@ if __name__ == "__main__":
                 hyperparams = all_hparams[model_name]
             else:
                 hyperparams = {'n_estimators': 100, 'learning_rate': 0.05, 'max_depth': 3, 'gamma': 2, 'subsample': 0.3, 'early_stopping_rounds': 10}
-            model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams)
+            with open(args.original_train) as f:
+                feature_names = f.readline()[1:].strip().split(",")
+            model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams, header = feature_names)
             weights_train = predict_XGB(original_train, model)
             weights_val = predict_XGB(original_val, model)
             weights_test = predict_XGB(original_test, model)

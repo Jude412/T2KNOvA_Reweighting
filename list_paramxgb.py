@@ -1,10 +1,10 @@
 import json
 import os
 n_estimators_list = [1000]
-max_depth_list = [3, 5, 6, 7]
+max_depth_list = [3, 5, 7, 9]
 learning_rate_list = [0.01, 0.05, 0.1, 0.2]
-subsample_list = [0.85, 1]
-gamma_list = [0.1, 0.5, 2, 6]
+subsample_list = [1]
+gamma_list = [2, 6, 10, 20]
 min_child_weight_list = [1, 10, 50] #default 1
 lambda_list = [1] #default 1
 alpha_list = [0] #default 0

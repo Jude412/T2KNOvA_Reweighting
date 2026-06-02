@@ -126,7 +126,8 @@ def train_XGB(original_train, original_val, target_train, target_val,
                     "learning_rate": 0.1,
                     "subsample": 1, 
                     "gamma": 1,
-                    "early_stopping_rounds": 10}, original_train_weight=None, original_val_weight=None, target_train_weight=None, target_val_weight=None):
+                    "early_stopping_rounds": 10}, original_train_weight=None, original_val_weight=None, target_train_weight=None, target_val_weight=None, 
+                    header = None):
     """This function trains an XGBReweighter to reweight the 'original' distribution into the 'target' distribution. 
     The output is a model that can be used to give weights to the 'original' distribution to make it look like the 'target' distribution."""
     if original_train_weight is None:

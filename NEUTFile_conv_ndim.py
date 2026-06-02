@@ -113,19 +113,32 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     tree["K_pim"] = ak.sum(tree["E_pim"] - np.sqrt(tree["E_pim"]**2 - tree["P2_pim"]), axis=1)
     tree["K_pip"] = ak.sum(tree["E_pip"] - np.sqrt(tree["E_pip"]**2 - tree["P2_pip"]), axis=1)
 
+    # multiplicity of final state photons 
+
+    tree["N_gamma"] = ak.sum(pdg == 22, axis=1)
+
+    # multiplicity of final state particles that are not protons, neutrons, pions or photons
+
+    tree["N_other"] = ak.sum((pdg != 2112) & (pdg != 2212) & (pdg != 111) & (pdg != -211) & (pdg != 211) & (pdg != 22) & (pdg != 13), axis=1)
+
     # we create a modev2 parameters that gathers the modes based on the number of pions in the final state
-    # We choose the following mapping : 0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for  the rest
-    mask_CC0pi = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] + tree["N_pi0"] == 0) 
-    mask_CC1pipm = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] == 1) & (tree["N_pi0"] == 0)
-    mask_CC1pi0 = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] == 0) & (tree["N_pi0"] == 1)
-    mask_CCNpi = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] + tree["N_pi0"] >= 2)
-    mask_CCOther = (tree["Mode"] <= 30) & (~mask_CC0pi) & (~mask_CC1pipm) & (~mask_CC1pi0) & (~mask_CCNpi)
+    # We choose the following mapping : 0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE
+    mask_CC0pi = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] + tree["N_pi0"] == 0) & (tree["N_gamma"] == 0) & (tree["N_other"] == 0)
+    mask_CC1pipm = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] == 1) & (tree["N_pi0"] == 0) & (tree["N_gamma"] == 0) & (tree["N_other"] == 0)
+    mask_CC1pi0 = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] == 0) & (tree["N_pi0"] == 1) & (tree["N_gamma"] == 0) & (tree["N_other"] == 0)
+    mask_CCNpi = (tree["Mode"] <= 30) & (tree["N_pip"] + tree["N_pim"] + tree["N_pi0"] >= 2) & (tree["N_gamma"] == 0) & (tree["N_other"] == 0)
+    mask_CCgamma = (tree["Mode"] <= 30) & (tree["N_gamma"] >= 1)
+    mask_CCOther_QE = (tree["Mode"] == 1) & (~mask_CC0pi) & (~mask_CC1pipm) & (~mask_CC1pi0) & (~mask_CCNpi) & (~mask_CCgamma)
+    mask_CCOther = (tree["Mode"] <= 30) & (~mask_CC0pi) & (~mask_CC1pipm) & (~mask_CC1pi0) & (~mask_CCNpi) & (~mask_CCgamma) & (~mask_CCOther_QE)
     tree["Mode_v2"] = ak.where(mask_CC0pi, 0,
                         ak.where(mask_CC1pipm, 1,
                             ak.where(mask_CC1pi0, 2,
                                 ak.where(mask_CCNpi, 3,
-                                    ak.where(mask_CCOther, 4,
-                                        5)))))
+                                    ak.where(mask_CCgamma, 6,
+                                        ak.where(mask_CCOther_QE, 7,
+                                            ak.where(mask_CCOther, 4, 5)
+                                        ))))))
+    
     
     # cut the tree to the desired modes_v2 if desired
 
@@ -135,6 +148,12 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
             mask = mask | (tree["Mode_v2"] == m)
 
         tree = tree[mask]
+
+    if 6 not in modes_v2:
+        print("Warning : the CCgamma mode is not included. If you want to include it, please add 6 to the modes_v2 list.")
+
+    if 7 not in modes_v2:
+        print("Warning : the CCOther_QE mode is not included. If you want to include it, please add 7 to the modes_v2 list.")
 
     # we now create the final array containing the parameters of interest
     param_values = []
