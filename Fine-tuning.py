@@ -91,8 +91,10 @@ if __name__ == "__main__":
     
     elif args.model == 'XGB':
         hyperparams = json.load(open(args.hyperparameters)) if args.hyperparameters is not None else {'n_estimators': 100, 'learning_rate': 0.05, 'max_depth': 3, 'gamma': 2, 'subsample': 0.3, 'early_stopping_rounds': 10}
-        model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams)
-        weights_test = predict_XGB(original_test, model)
+        with open(os.path.join(args.train_sample_dir, "original_train.csv")) as f:
+                feature_names = f.readline()[1:].strip().split(",")
+        model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams, header = feature_names)
+        weights_test = predict_XGB(original_test, model, header = feature_names)
         logdir = args.logdir + f"/run_{hyperparams['max_depth']}_{hyperparams['learning_rate']}_{hyperparams['n_estimators']}_{hyperparams['gamma']}_{hyperparams['subsample']}_{hyperparams['early_stopping_rounds']}_{int(time.time())}"
         writer = SummaryWriter(logdir)
 

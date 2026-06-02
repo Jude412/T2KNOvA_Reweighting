@@ -96,9 +96,9 @@ if __name__ == "__main__":
             with open(args.original_train) as f:
                 feature_names = f.readline()[1:].strip().split(",")
             model = train_XGB(original_train, original_val, target_train, target_val, hparams = hyperparams, header = feature_names)
-            weights_train = predict_XGB(original_train, model)
-            weights_val = predict_XGB(original_val, model)
-            weights_test = predict_XGB(original_test, model)
+            weights_train = predict_XGB(original_train, model, header = feature_names)
+            weights_val = predict_XGB(original_val, model, header = feature_names)
+            weights_test = predict_XGB(original_test, model, header = feature_names)
 
         else:
             raise ValueError("Invalid model choice. Please choose from 'binning', 'NN', 'GBR', 'XGB'.")

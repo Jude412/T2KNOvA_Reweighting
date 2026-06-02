@@ -36,6 +36,11 @@ analysis:
     
 
   modes_v2:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
     - 5
     
   #choose in 0, 1, 2, 3, 4, 5, 6 and 7 (0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE)
@@ -65,11 +70,11 @@ models:
     binning: 24
     NN: 240
     GBR: 270
-    XGB : 192
+    XGB : 128
     
 
 dimensions:
   dim: 6
 
 output:
-  tag: "6D_5DMode_v2_5"
+  tag: "6D_5DMode_v2_0to5_categorical"

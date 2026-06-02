@@ -6,6 +6,7 @@ the function will also return the scaling constant, which can be used to rescale
 
 #imports 
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from hep_ml import reweight
 from xgboost import XGBClassifier
@@ -134,28 +135,54 @@ def train_XGB(original_train, original_val, target_train, target_val,
         original_train_weight = np.ones(original_train.shape[0])/original_train.shape[0]
     if target_train_weight is None:
         target_train_weight = np.ones(target_train.shape[0])/target_train.shape[0]
-    
+       
     X_train = np.concatenate((original_train, target_train), axis=0)
     Y_train = np.concatenate((np.zeros(len(original_train)), np.ones(len(target_train))), axis=0)
     X_val = np.concatenate((original_val, target_val), axis=0)
     Y_val = np.concatenate((np.zeros(len(original_val)), np.ones(len(target_val))), axis=0)
 
-    bst = XGBClassifier(objective='binary:logistic',
-                    eval_metric=['logloss', 'auc'],
-                    scale_pos_weight = len(original_train) / len(target_train),
-                    **hparams)
+    if header is not None and "Mode_v2" in header:
+        print("Mode_v2 is in the header, converting it to categorical.")
+        X_train_df = pd.DataFrame(X_train, columns=header)
+        X_val_df   = pd.DataFrame(X_val, columns=header)
 
-    bst.fit(
-        X_train, Y_train,
-        eval_set=[(X_val, Y_val), (X_train, Y_train)],
-        verbose=False
-    )
+        X_train_df["Mode_v2"] = X_train_df["Mode_v2"].astype("category")
+        X_val_df["Mode_v2"]   = X_val_df["Mode_v2"].astype("category")
+
+        bst = XGBClassifier(objective='binary:logistic',
+                        eval_metric=['logloss', 'auc'],
+                        scale_pos_weight = len(original_train) / len(target_train),
+                        enable_categorical=True,
+                        **hparams)
+
+        bst.fit(
+            X_train_df, Y_train,
+            eval_set=[(X_val_df, Y_val), (X_train_df, Y_train)],
+            verbose=False
+        )
+
+    else:
+        bst = XGBClassifier(objective='binary:logistic',
+                        eval_metric=['logloss', 'auc'],
+                        scale_pos_weight = len(original_train) / len(target_train),
+                        **hparams)
+
+        bst.fit(
+            X_train, Y_train,
+            eval_set=[(X_val, Y_val), (X_train, Y_train)],
+            verbose=False
+        )
 
     return bst
 
-def predict_XGB(original, model):
+def predict_XGB(original, model, header = None):
     """This function uses the trained model to return the weights used for the reweighting process."""
-    predictions = model.predict_proba(original, iteration_range=(0, model.best_iteration + 1))
+    if header is not None and "Mode_v2" in header:
+        original_df = pd.DataFrame(original, columns=header)
+        original_df["Mode_v2"] = original_df["Mode_v2"].astype("category")
+        predictions = model.predict_proba(original_df, iteration_range=(0, model.best_iteration + 1))
+    else:
+        predictions = model.predict_proba(original, iteration_range=(0, model.best_iteration + 1))
     weights = predictions[:, 1] / predictions[:, 0]
     reweighting_scale = 1 / np.sum(weights)
     return reweighting_scale * weights
