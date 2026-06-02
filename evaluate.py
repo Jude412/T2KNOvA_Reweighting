@@ -60,7 +60,9 @@ if __name__ == "__main__":
     swd_distribution_target_21D = np.load(args.swd_distribution_target_21D)
 
     # The model predicts weights
-    weights = predict_XGB(original_test_nD, model)
+    with open(args.original_test_nD) as f:
+        feature_names = f.readline()[1:].strip().split(",")
+    weights = predict_XGB(original_test_nD, model, header=feature_names)
     weights_dict = {"XGB": weights, "Unweighted": np.ones_like(weights)/len(weights)}
     # We plot using plot_histograms
     if not os.path.exists(args.output_path):
