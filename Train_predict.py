@@ -178,21 +178,21 @@ def train_XGB(original_train, original_val, target_train, target_val,
 
  
         bst = XGBClassifier(objective='binary:logistic',
-                        eval_metric=['logloss', 'auc'],
+                        eval_metric=['auc', 'logloss'],
                         enable_categorical=True,
                         **hparams)
 
         bst.fit(
             X_train_df, Y_train,
-            sample_weight = X_train_weighted,
-            eval_set=[(X_train_df, Y_train), (X_val_df, Y_val)],
-            sample_weight_eval_set=[X_train_weighted, X_val_weighted],
+            #sample_weight = X_train_weighted,
+            eval_set=[(X_train_df, Y_train), (X_val_df, Y_val)], 
+            #sample_weight_eval_set=[X_train_weighted, X_val_weighted],
             verbose=False
         )
 
     else:
         bst = XGBClassifier(objective='binary:logistic',
-                        eval_metric=['logloss', 'auc'],
+                        eval_metric=['auc', 'logloss'],
                         scale_pos_weight = len(original_train) / len(target_train),
                         **hparams)
 

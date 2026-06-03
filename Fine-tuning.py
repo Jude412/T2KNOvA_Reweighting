@@ -172,10 +172,10 @@ if __name__ == "__main__":
     else:
         best_iter = model.best_iteration
         metrics = {
-            "val_logloss": model.evals_result()['validation_0']['logloss'][best_iter],
-            "val_auc": model.evals_result()['validation_0']['auc'][best_iter],
-            "train_logloss": model.evals_result()['validation_1']['logloss'][best_iter],
-            "train_auc": model.evals_result()['validation_1']['auc'][best_iter],
+            "val_logloss": model.evals_result()['validation_1']['logloss'][best_iter],
+            "val_auc": model.evals_result()['validation_1']['auc'][best_iter],
+            "train_logloss": model.evals_result()['validation_0']['logloss'][best_iter],
+            "train_auc": model.evals_result()['validation_0']['auc'][best_iter],
             # "test_logloss": model.evals_result()['validation_2']['logloss'][best_iter],
             # "test_auc": model.evals_result()['validation_2']['auc'][best_iter],
             "SWD_3D": swd_3d,
