@@ -155,8 +155,8 @@ if __name__ == "__main__":
         model = pickle.load(open(model_path, "rb"))
         training_history = model.evals_result()
         with PdfPages(os.path.join(args.output_file, "XGB_training_history.pdf")) as pdf:
-            plt.plot(training_history["validation_0"]["logloss"], label='Validation Log Loss')
-            plt.plot(training_history["validation_1"]["logloss"], label='Train Log Loss')
+            plt.plot(training_history["validation_0"]["logloss"], label='Train Log Loss')
+            plt.plot(training_history["validation_1"]["logloss"], label='Validation Log Loss')
             plt.xlabel('Epoch')
             plt.ylabel('Log Loss')
             plt.title(f'Training History for XGB {len(Index_parameters)}D training')

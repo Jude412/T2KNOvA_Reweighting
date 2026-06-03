@@ -77,4 +77,4 @@ dimensions:
   dim: 6
 
 output:
-  tag: "6D_5DMode_v2_0to5"
+  tag: "6D_5DMode_v2_0to5_cat_even"
