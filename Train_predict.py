@@ -131,10 +131,14 @@ def train_XGB(original_train, original_val, target_train, target_val,
                     header = None):
     """This function trains an XGBReweighter to reweight the 'original' distribution into the 'target' distribution. 
     The output is a model that can be used to give weights to the 'original' distribution to make it look like the 'target' distribution."""
-    if original_train_weight is None:
-        original_train_weight = np.ones(original_train.shape[0])/original_train.shape[0]
-    if target_train_weight is None:
-        target_train_weight = np.ones(target_train.shape[0])/target_train.shape[0]
+    # if original_train_weight is None:
+    #     original_train_weight = np.ones(original_train.shape[0])/original_train.shape[0]
+    # if target_train_weight is None:
+    #     target_train_weight = np.ones(target_train.shape[0])/target_train.shape[0]
+    # if target_val_weight is None:
+    #     target_val_weight = np.ones(target_val.shape[0])/target_val.shape[0]
+    # if original_val_weight is None:
+    #     original_val_weight = np.ones(original_val.shape[0])/original_val.shape[0]
        
     X_train = np.concatenate((original_train, target_train), axis=0)
     Y_train = np.concatenate((np.zeros(len(original_train)), np.ones(len(target_train))), axis=0)
@@ -142,6 +146,7 @@ def train_XGB(original_train, original_val, target_train, target_val,
     Y_val = np.concatenate((np.zeros(len(original_val)), np.ones(len(target_val))), axis=0)
 
     if header is not None and "Mode_v2" in header:
+        mode_v2_index = header.index("Mode_v2")
         print("Mode_v2 is in the header, converting it to categorical.")
         X_train_df = pd.DataFrame(X_train, columns=header)
         X_val_df   = pd.DataFrame(X_val, columns=header)
@@ -149,15 +154,39 @@ def train_XGB(original_train, original_val, target_train, target_val,
         X_train_df["Mode_v2"] = X_train_df["Mode_v2"].astype("category")
         X_val_df["Mode_v2"]   = X_val_df["Mode_v2"].astype("category")
 
+        print("Equalizing the two classes overall, and giving equal importance to each mode_v2 in the training.")
+
+        original_train_weight = np.zeros(original_train.shape[0])
+        original_val_weight = np.zeros(original_val.shape[0])
+        target_train_weight = np.zeros(target_train.shape[0])
+        target_val_weight = np.zeros(target_val.shape[0])
+
+        mode_v2_list = np.unique(X_train_df["Mode_v2"])
+        for mode in mode_v2_list:
+            original_train_weight[original_train[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
+            original_val_weight[original_val[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
+            target_train_weight[target_train[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
+            target_val_weight[target_val[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
+        
+        original_train_weight /= original_train.shape[0]
+        original_val_weight /= original_val.shape[0]
+        target_train_weight /= target_train.shape[0]
+        target_val_weight /= target_val.shape[0]
+
+        X_train_weighted = np.concatenate((original_train_weight, target_train_weight), axis=0)
+        X_val_weighted = np.concatenate((original_val_weight, target_val_weight), axis=0)
+
+ 
         bst = XGBClassifier(objective='binary:logistic',
                         eval_metric=['logloss', 'auc'],
-                        scale_pos_weight = len(original_train) / len(target_train),
                         enable_categorical=True,
                         **hparams)
 
         bst.fit(
             X_train_df, Y_train,
-            eval_set=[(X_val_df, Y_val), (X_train_df, Y_train)],
+            sample_weight = X_train_weighted,
+            eval_set=[(X_train_df, Y_train), (X_val_df, Y_val)],
+            sample_weight_eval_set=[X_train_weighted, X_val_weighted],
             verbose=False
         )
 
@@ -169,7 +198,7 @@ def train_XGB(original_train, original_val, target_train, target_val,
 
         bst.fit(
             X_train, Y_train,
-            eval_set=[(X_val, Y_val), (X_train, Y_train)],
+            eval_set=[(X_train, Y_train), (X_val, Y_val)],
             verbose=False
         )
 
