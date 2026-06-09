@@ -1,1 +1,0 @@
-{"n_estimators": 1000, "learning_rate": 0.2, "max_depth": 3, "subsample": 1, "gamma": 2, "min_child_weight": 1, "lambda": 5, "alpha": 0, "early_stopping_rounds": 10}

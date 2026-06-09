@@ -47,10 +47,12 @@ if __name__ == "__main__":
 
         if model == "XGB":
             df = pd.read_csv(os.path.join(input_dir, f"{model}/Hyperparameters_metrics.csv"))
-            best_set = df.loc[df['chi2_dof_8D'].idxmin()]
+            best_set = df.loc[df['chi2_dof_3D'].idxmin()]
             model_best_set_hyperparameters[model] = {
                 "n_estimators" : int(best_set['n_estimators']),
                  "gamma" : float(best_set['gamma']),
+                 "alpha" : float(best_set['alpha']),
+                 "lambda" : float(best_set['lambda']),
                  "max_depth" : int(best_set['max_depth']),
                  "learning_rate" : float(best_set['learning_rate']),
                 "subsample" : float(best_set['subsample']), 

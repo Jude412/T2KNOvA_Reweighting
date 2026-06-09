@@ -33,8 +33,8 @@ if __name__ == "__main__":
     args.add_argument("--binning_file", type=str, help="Path to the json file containing the binning information for each parameter.")
     args.add_argument("--output_file", type = str, help = "The path to the csv file where the hyperparameters and metrics will be saved in addition to the tensorboard log file.")
     args = args.parse_args()
-    List_parameters = ["Enu_true","ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav"]
-    List_parameters_21D = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode", "Mode_v2",
+    List_parameters = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "Eav",]
+    List_parameters_21D = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "Eav", "W", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     # Load the data
 

@@ -28,12 +28,12 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
             #For the sake of the plots in this particular function, we use a binning that expands from the 1st to the 99th percentile 
             #of the target distribution.
             #Note that this might not be the best choice for a physical interpretation.
-            # first_percentile = np.percentile(target[:, i], 0)
-            # ninety_ninth_percentile = np.percentile(target[:, i], 99)
-            x_min = dict_binning[xlabels[i]]["x_min"]
-            x_max = dict_binning[xlabels[i]]["x_max"]
-            n_bins = dict_binning[xlabels[i]]["n_bins"]
-            bins = np.linspace(x_min, x_max, n_bins+1)
+            first_percentile = np.percentile(target[:, i], 1)
+            ninety_ninth_percentile = np.percentile(target[:, i], 99)
+            # x_min = dict_binning[xlabels[i]]["x_min"]
+            # x_max = dict_binning[xlabels[i]]["x_max"]
+            # n_bins = dict_binning[xlabels[i]]["n_bins"]
+            bins = np.linspace(first_percentile, ninety_ninth_percentile, 30)
             bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
             # Getting the distributions and their uncertainties, with a normalization to the total number of events
@@ -90,7 +90,7 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
 
             if add_chi2:
                 for key in weights_dict.keys():
-                    chi2, dof = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, x_min=x_min, x_max=x_max, n_bins=n_bins)
+                    chi2, dof = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, n_bins= 30)
                     chi2_values[key] = chi2/dof if dof > 0 else 0
 
             # if text_str != "WD- \nChi2-":
@@ -261,9 +261,9 @@ def plot_2D_histogram(original, target, weights_dict, target_weights = None, xla
     return None
 
 def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, x_min=0, x_max=1, n_bins = 100):
-    # first_percentile = np.percentile(target[:, axis_number], 0)
-    # ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
-    bins = np.linspace(x_min, x_max, n_bins+1)
+    first_percentile = np.percentile(target[:, axis_number], 1)
+    ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
+    bins = np.linspace(first_percentile, ninety_ninth_percentile, n_bins)
 
     if target_weights is not None:
         hist_target = np.histogram(target[:, axis_number], bins=bins, weights=target_weights/np.sum(target_weights))[0]
@@ -285,15 +285,15 @@ def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = N
     return chi2, dof
 
 def chi2_hist_naxis(original, target, rw_weights, binning_dict, target_weights = None):
-    List_parameters = list(binning_dict.keys())
+    # List_parameters = list(binning_dict.keys())
     n = original.shape[1]
     chi2 = 0
     dof = 0
     for axis_number in range(n):
-        x_min = binning_dict[List_parameters[axis_number]]["x_min"]
-        x_max = binning_dict[List_parameters[axis_number]]["x_max"]
-        n_bins = binning_dict[List_parameters[axis_number]]["n_bins"]
-        chi2_val, dof_val = chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, x_min=x_min, x_max=x_max, n_bins=n_bins)
+        # x_min = binning_dict[List_parameters[axis_number]]["x_min"]
+        # x_max = binning_dict[List_parameters[axis_number]]["x_max"]
+        # n_bins = binning_dict[List_parameters[axis_number]]["n_bins"]
+        chi2_val, dof_val = chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, n_bins=30)
         chi2 += chi2_val
         dof += dof_val
     return chi2, dof

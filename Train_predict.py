@@ -161,17 +161,21 @@ def train_XGB(original_train, original_val, target_train, target_val,
         target_train_weight = np.zeros(target_train.shape[0])
         target_val_weight = np.zeros(target_val.shape[0])
 
-        mode_v2_list = np.unique(X_train_df["Mode_v2"])
+        mode_v2_list = np.unique(original_train[:, mode_v2_index])
         for mode in mode_v2_list:
-            original_train_weight[original_train[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
-            original_val_weight[original_val[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
-            target_train_weight[target_train[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
-            target_val_weight[target_val[:, mode_v2_index] == mode] = 1 / len(mode_v2_list)
-        
-        original_train_weight /= original_train.shape[0]
-        original_val_weight /= original_val.shape[0]
-        target_train_weight /= target_train.shape[0]
-        target_val_weight /= target_val.shape[0]
+            original_train_weight[original_train[:, mode_v2_index] == mode] = 1 / ( np.sum(original_train[:, mode_v2_index] == mode) * len(mode_v2_list) )
+            original_val_weight[original_val[:, mode_v2_index] == mode] = 1 / ( np.sum(original_val[:, mode_v2_index] == mode) * len(mode_v2_list) )
+            target_train_weight[target_train[:, mode_v2_index] == mode] = 1 / ( np.sum(target_train[:, mode_v2_index] == mode) * len(mode_v2_list) )
+            target_val_weight[target_val[:, mode_v2_index] == mode] = 1 / ( np.sum(target_val[:, mode_v2_index] == mode) * len(mode_v2_list) )
+
+        scale_factor = original_train.shape[0] / target_train.shape[0]
+        target_train_weight *= scale_factor
+        target_val_weight *= scale_factor
+
+        original_train_weight *= original_train.shape[0]
+        original_val_weight *= original_val.shape[0]
+        target_train_weight *= target_train.shape[0]
+        target_val_weight *= target_val.shape[0]
 
         X_train_weighted = np.concatenate((original_train_weight, target_train_weight), axis=0)
         X_val_weighted = np.concatenate((original_val_weight, target_val_weight), axis=0)
@@ -184,9 +188,9 @@ def train_XGB(original_train, original_val, target_train, target_val,
 
         bst.fit(
             X_train_df, Y_train,
-            #sample_weight = X_train_weighted,
+            sample_weight = X_train_weighted,
             eval_set=[(X_train_df, Y_train), (X_val_df, Y_val)], 
-            #sample_weight_eval_set=[X_train_weighted, X_val_weighted],
+            sample_weight_eval_set=[X_train_weighted, X_val_weighted],
             verbose=False
         )
 

@@ -43,8 +43,8 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     # Open the ROOT file
     file = uproot.open(input_file)
     branches = ["Enu_true", "ELep", "CosLep", "Eav", "Q2", "q0", "q3", "W", "y",
-                 "PDGnu", "Mode", "cc", "nfsp", "px", "py", "pz", "E", "pdg", "pdg_vert"]
-    List_final_params = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y",
+                 "PDGnu", "Mode", "cc", "nfsp", "px", "py", "pz", "E", "pdg", "pdg_vert", "px", "py", "pz"]
+    List_final_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "PTlep",
                  "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     tree = file["FlatTree_VARS"].arrays(branches, library="ak")
     
@@ -58,6 +58,21 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
         tree = tree[~weird_mask]
 
     # we now compute the parameters of interest
+    # Plep and PTlep are computed from px py pz using the first lepton in the final state (in pdg branch)
+    mask_lepton = (
+    (np.abs(tree["pdg"]) == 11) |
+    (np.abs(tree["pdg"]) == 12) |
+    (np.abs(tree["pdg"]) == 13) |
+    (np.abs(tree["pdg"]) == 14)
+    )
+
+    px_lep = ak.firsts(tree["px"][mask_lepton])
+    py_lep = ak.firsts(tree["py"][mask_lepton])
+    pz_lep = ak.firsts(tree["pz"][mask_lepton])
+
+    tree["Plep"] = np.sqrt(px_lep**2 + py_lep**2 + pz_lep**2)
+    tree["PTlep"] = np.sqrt(px_lep**2 + py_lep**2)
+
     # A (this may change, since there might be different nuclei in the same file later on)
     coherent_mask = tree["Mode"] == 16
     A_value_string = np.unique(tree[coherent_mask]["pdg_vert"][:, 1])[0] # format : 10LZZZAAAI
@@ -142,18 +157,18 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     
     # cut the tree to the desired modes_v2 if desired
 
-    if modes_v2 is not None:
-        mask = False
-        for m in modes_v2:
-            mask = mask | (tree["Mode_v2"] == m)
+    # if modes_v2 is not None:
+    #     mask = False
+    #     for m in modes_v2:
+    #         mask = mask | (tree["Mode_v2"] == m)
 
-        tree = tree[mask]
+    #     tree = tree[mask]
 
-    if 6 not in modes_v2:
-        print("Warning : the CCgamma mode is not included. If you want to include it, please add 6 to the modes_v2 list.")
+    # if 6 not in modes_v2:
+    #     print("Warning : the CCgamma mode is not included. If you want to include it, please add 6 to the modes_v2 list.")
 
-    if 7 not in modes_v2:
-        print("Warning : the CCOther_QE mode is not included. If you want to include it, please add 7 to the modes_v2 list.")
+    # if 7 not in modes_v2:
+    #     print("Warning : the CCOther_QE mode is not included. If you want to include it, please add 7 to the modes_v2 list.")
 
     # we now create the final array containing the parameters of interest
     param_values = []
