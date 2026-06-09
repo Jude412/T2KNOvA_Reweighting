@@ -260,7 +260,7 @@ def plot_2D_histogram(original, target, weights_dict, target_weights = None, xla
 
     return None
 
-def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, x_min=0, x_max=1, n_bins = 100):
+def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, x_min=0, x_max=1, n_bins = 30):
     first_percentile = np.percentile(target[:, axis_number], 1)
     ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
     bins = np.linspace(first_percentile, ninety_ninth_percentile, n_bins)

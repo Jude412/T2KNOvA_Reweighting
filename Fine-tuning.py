@@ -192,10 +192,10 @@ if __name__ == "__main__":
         binning_dict = json.load(f)
 
     for i in range(original_test_21D.shape[1]):
-        x_min = binning_dict[List_parameters_21D[i]]["x_min"]
-        x_max = binning_dict[List_parameters_21D[i]]["x_max"]
-        n_bins = binning_dict[List_parameters_21D[i]]["n_bins"]
-        chi2, dof = chi2_hist_axis(original_test_21D, target_test_21D, weight_dict[args.model], axis_number = i, x_min=x_min, x_max=x_max, n_bins=n_bins)
+        # x_min = binning_dict[List_parameters_21D[i]]["x_min"]
+        # x_max = binning_dict[List_parameters_21D[i]]["x_max"]
+        # n_bins = binning_dict[List_parameters_21D[i]]["n_bins"]
+        chi2, dof = chi2_hist_axis(original_test_21D, target_test_21D, weight_dict[args.model], axis_number = i, n_bins=30)
         metrics[f"chi2_dof_{List_parameters_21D[i]}"] = chi2/dof if dof > 0 else 0
 
     metrics[f"chi2_dof_3D"] = chi2_dof(original_test_3D, target_test_3D, weight_dict, binning_dict=binning_dict)[args.model]
