@@ -57,6 +57,10 @@ features:
     - Enu_true
     - Plep
     - CosLep
+    - PTlep
+    - Eav
+    - W
+
     
   
   binning_file: "/home/hep/tlt26/RW_Snakemake/binnings.json"
@@ -77,8 +81,8 @@ models:
     
 
 dimensions:
-  dim: 3_custom
-  # In case of 3 or 8 dimensions, add a 'custom' tag to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
+  dim: 6
+  # In case of 3 or 8 dimensions, add an extra string (ex: "_custom") to dim, to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
 
 output:
-  tag: "3D_CCQE_PLep"
+  tag: "6D_CCQE_PLep_PTlep_Eav_W"

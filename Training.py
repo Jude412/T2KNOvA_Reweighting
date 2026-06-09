@@ -30,6 +30,8 @@ if __name__ == "__main__":
                         default="/home/hep/tlt26/T2K_Rw/Ndim/saved_weights/4D_Eav/")
     parser.add_argument('--save_model_path', type=str, required=False, help='Path to save the trained model file.',
                         default="/home/hep/tlt26/T2K_Rw/Ndim/saved_models/4D_Eav/")
+    parser.add_argument('--save_weight_path_dict', type=str, help = "path to the json file where the dictionary " \
+    "   containing the paths to the predicted weights for each model will be saved.")
     args = parser.parse_args()
 
     original_train = np.loadtxt(args.original_train, delimiter=',')
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     for model_name in args.model_list:
         weights_path_dict[f"{model_name}"] = os.path.join(args.save_weights_path, f"{model_name}_weights_test_{np.shape(original_test)[1]}D.csv")
     
-    json.dump(weights_path_dict, open(os.path.join(args.save_weights_path, f"weights_path_dict_{np.shape(original_test)[1]}D.json"), 'w'), indent=0)
+    json.dump(weights_path_dict, open(os.path.join(args.save_weight_path_dict), 'w'), indent=0)
         
 
 

@@ -299,7 +299,7 @@ rule train_models:
     output:
         model_dir=directory(MODEL_DIR),
         weights_dir=directory(WEIGHTS_DIR),
-        last_written_file = WEIGHTS_DIR + f"weights_path_dict_{DIM}D.json"
+        save_weight_path_dict = WEIGHTS_DIR + f"weights_path_dict_{DIM}D.json"
         
     conda:
         ENV
@@ -315,7 +315,8 @@ rule train_models:
             --hparams_dict {input.hparam_file} \
             --save_weights_path {output.weights_dir} \
             --save_model_path {output.model_dir} \
-            --model_list {params.model_list_str}
+            --model_list {params.model_list_str} \
+            --save_weight_path_dict {output.save_weight_path_dict} \
         """
         
 
