@@ -86,9 +86,9 @@ if __name__ == "__main__":
             chi2_dim = {}
             for param in List_all_parameters:
                 param_index = List_all_parameters.index(param)
-                x_min, x_max = binning_dict[param]["x_min"], binning_dict[param]["x_max"]
-                n_bins = binning_dict[param]["n_bins"]
-                chi2_val, dof = chi2_hist_axis(original_test, target_test, weights_dict[key], param_index, x_min=x_min, x_max=x_max, n_bins=n_bins)  
+                # x_min, x_max = binning_dict[param]["x_min"], binning_dict[param]["x_max"]
+                # n_bins = binning_dict[param]["n_bins"]
+                chi2_val, dof = chi2_hist_axis(original_test, target_test, weights_dict[key], param_index, n_bins=30)  
                 chi2_dim[param] = chi2_val/dof if dof > 0 else 0
             chi2_dict[key] = chi2_dim
 
