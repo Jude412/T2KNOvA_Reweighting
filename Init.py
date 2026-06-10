@@ -49,8 +49,8 @@ if __name__ == "__main__":
     Index_8D_params = [List_all_params.index(param) for param in List_parameters_analysis[:8]]
     Index_3D_params = [List_all_params.index(param) for param in List_parameters_analysis[:3]]
 
-    original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes) # modes_v2 = args.modes_v2)
-    target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes) # modes_v2 = args.modes_v2)
+    original = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes, modes_v2 = args.modes_v2)
+    target = convert_GENIE_input_file_alldim(args.input_file_GENIE, modes = args.modes, modes_v2 = args.modes_v2)
 
     original_21D = original[:, Index_21D_params]
     target_21D = target[:, Index_21D_params]
