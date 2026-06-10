@@ -5,31 +5,31 @@ paths:
 analysis:
   modes: 
     - 1
-    # - 2
-    # - 11
-    # - 12
-    # - 13
-    # - 16
-    # - 17
-    # - 21
-    # - 22
-    # - 23
-    # - 26
-    # - 31
-    # - 32
-    # - 33
-    # - 34
-    # - 36
-    # - 38
-    # - 39
-    # - 41
-    # - 42
-    # - 43
-    # - 44
-    # - 45
-    # - 46
-    # - 51
-    # - 52
+    - 2
+    - 11
+    - 12
+    - 13
+    - 16
+    - 17
+    - 21
+    - 22
+    - 23
+    - 26
+    - 31
+    - 32
+    - 33
+    - 34
+    - 36
+    - 38
+    - 39
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 51
+    - 52
 
     #choose in 1, 2, 11, 12, 13, 16, 17, 21, 22, 23, 26, 31, 32, 33, 34, 36, 38, 39, 41, 42, 43, 44, 45, 46, 51 and 52
 
@@ -37,13 +37,6 @@ analysis:
 
   modes_v2:
     - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
     
   #choose in 0, 1, 2, 3, 4, 5, 6 and 7 (0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE)
 
@@ -68,9 +61,6 @@ features:
 
 models:
   model_list:
-    - binning
-    - NN
-    - GBR
     - XGB
   
   number_model_hyperparameters_sets:
@@ -85,4 +75,4 @@ dimensions:
   # In case of 3 or 8 dimensions, add an extra string (ex: "_custom") to dim, to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
 
 output:
-  tag: "6D_CCQE_PLep_PTlep_Eav_W"
+  tag: "6D_Plep_PTlep_W_Eav_Modev2_0"

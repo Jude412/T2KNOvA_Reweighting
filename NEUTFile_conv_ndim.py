@@ -157,18 +157,18 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     
     # cut the tree to the desired modes_v2 if desired
 
-    # if modes_v2 is not None:
-    #     mask = False
-    #     for m in modes_v2:
-    #         mask = mask | (tree["Mode_v2"] == m)
+    if modes_v2 is not None:
+        mask = False
+        for m in modes_v2:
+            mask = mask | (tree["Mode_v2"] == m)
 
-    #     tree = tree[mask]
+        tree = tree[mask]
 
-    # if 6 not in modes_v2:
-    #     print("Warning : the CCgamma mode is not included. If you want to include it, please add 6 to the modes_v2 list.")
+    if 6 not in modes_v2:
+        print("Warning : the CCgamma mode is not included. If you want to include it, please add 6 to the modes_v2 list.")
 
-    # if 7 not in modes_v2:
-    #     print("Warning : the CCOther_QE mode is not included. If you want to include it, please add 7 to the modes_v2 list.")
+    if 7 not in modes_v2:
+        print("Warning : the CCOther_QE mode is not included. If you want to include it, please add 7 to the modes_v2 list.")
 
     # we now create the final array containing the parameters of interest
     param_values = []

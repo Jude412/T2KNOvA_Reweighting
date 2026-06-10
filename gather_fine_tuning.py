@@ -18,14 +18,14 @@ if __name__ == "__main__":
     for model in model_list:
         if model == "binning":
             df = pd.read_csv(os.path.join(input_dir, f"{model}/Hyperparameters_metrics.csv"))
-            best_set = df.loc[df['p_value_8D'].idxmax()]
+            best_set = df.loc[df['p_value_3D'].idxmax()]
             model_best_set_hyperparameters[model] = {
                 "n_bins" : int(best_set['n_bins']),
                 "n_neighs" : int(best_set['n_neighs'])
             }
         if model == "NN":
             df = pd.read_csv(os.path.join(input_dir, f"{model}/Hyperparameters_metrics.csv"))
-            best_set = df.loc[df['p_value_8D'].idxmax()]
+            best_set = df.loc[df['p_value_3D'].idxmax()]
             model_best_set_hyperparameters[model] = {
                 "n_layers" : int(best_set['n_layers']),
                 "n_neurons" : int(best_set['n_neurons']),
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         
         if model == "GBR":
             df = pd.read_csv(os.path.join(input_dir, f"{model}/Hyperparameters_metrics.csv"))
-            best_set = df.loc[df['p_value_8D'].idxmax()]
+            best_set = df.loc[df['p_value_3D'].idxmax()]
             model_best_set_hyperparameters[model] = {
                 "n_estimators": int(best_set['n_estimators']), 
                 "learning_rate": float(best_set['learning_rate']), 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         if model == "XGB":
             df = pd.read_csv(os.path.join(input_dir, f"{model}/Hyperparameters_metrics.csv"))
-            best_set = df.loc[df['p_value_8D'].idxmin()]
+            best_set = df.loc[df['p_value_3D'].idxmax()]
             model_best_set_hyperparameters[model] = {
                 "n_estimators" : int(best_set['n_estimators']),
                  "gamma" : float(best_set['gamma']),
