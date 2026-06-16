@@ -241,7 +241,8 @@ rule single_fine_tuning:
     params:
         model = "{model}",
         logdir = TENSORBOARD_DIR + "{model}/",
-        binning_file = config["features"]["binning_file"]
+        binning_file = config["features"]["binning_file"],
+        interest_params = config["features"]["parameters_interest"]
     
     output:
         output_file = TENSORBOARD_DIR + "{model}/run_{run_id}_metrics.csv"
@@ -263,6 +264,7 @@ rule single_fine_tuning:
             --hyperparameters {input.hparam_file} \
             --logdir {params.logdir} \
             --custom_swd_distribution {input.custom_swd_distribution} \
+            --params_interest {params.interest_params} \
             --binning_file {params.binning_file} \
             --output_file {output.output_file}
         """

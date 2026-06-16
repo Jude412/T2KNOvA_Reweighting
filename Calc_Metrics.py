@@ -6,7 +6,7 @@ We are here trying to implement it with n-dimensional distributions, for which w
 #imports
 import os
 
-from Metrics_ndim import chi2_hist_axis, plot_histograms, plot_2D_histogram, chi2_dof, compute_swd, compute_p_value
+from Metrics_ndim import chi2_hist_axis, plot_histograms, plot_2D_histogram, chi2_dof, compute_swd, compute_p_value, chi2_p_value
 import numpy as np
 import argparse
 import json
@@ -45,6 +45,12 @@ if __name__ == "__main__":
     List_all_parameters = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "Eav", "W", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     
+    List_labels_all_parameters = [r"$E^{true}_{\nu}$ (GeV)", r"$p_{lep}$ (GeV/c)", r"$cos(\theta_{lep})$",
+                                r"$Q^2$ (GeV$^2$/c$^2$)", r"$q_0$ (GeV)", r"$q_3$ (GeV/c)", r"$p^T_{lep}$ (GeV/c)",
+                                r"$E_{Av}$ (GeV)", r"$W$ (GeV/c$^2$)", "y", "Mode", "Mode_v2",
+                                "cc", "hitnuc", r"$N_n$", r"$K_n$ (GeV)", r"$N_p$", r"$K_p$ (GeV)", r"$N_{pi^0}$", r"$K_{pi^0}$ (GeV)", r"$N_{pi^+}$", r"$K_{pi^+}$ (GeV)",
+                                r"$N_{pi^-}$", r"$K_{pi^-}$ (GeV)"]
+    
     Index_parameters = [List_all_parameters.index(param) for param in args.interest_params]
 
     # We load the data and the weights
@@ -68,7 +74,8 @@ if __name__ == "__main__":
     if args.make_1D_plots:
         plot_histograms(original_test, target_test, weights_dict,
                         dict_binning=binning_dict,
-                        xlabels = List_all_parameters, 
+                        xlabels = List_labels_all_parameters,
+                        variables = List_all_parameters, 
                         output_file=os.path.join(args.output_file, "1Dhist.pdf"))
     
     if args.make_2D_plots:
@@ -86,15 +93,21 @@ if __name__ == "__main__":
             chi2_dim = {}
             for param in List_all_parameters:
                 param_index = List_all_parameters.index(param)
-                # x_min, x_max = binning_dict[param]["x_min"], binning_dict[param]["x_max"]
-                # n_bins = binning_dict[param]["n_bins"]
-                chi2_val, dof = chi2_hist_axis(original_test, target_test, weights_dict[key], param_index, n_bins=30)  
+                if param in binning_dict.keys():
+                    x_min, x_max = binning_dict[param]["x_min"], binning_dict[param]["x_max"]
+                    n_bins = binning_dict[param]["n_bins"]
+                else:
+                    x_min, x_max = None, None
+                    n_bins = 30
+                chi2_val, dof = chi2_hist_axis(original_test, target_test, weights_dict[key], param_index, n_bins=n_bins, x_min=x_min, x_max=x_max)  
                 chi2_dim[param] = chi2_val/dof if dof > 0 else 0
+                chi2_dim[param+"_p_value"] = chi2_p_value(chi2_val, dof)
             chi2_dict[key] = chi2_dim
 
-        chi2_3D_dict = chi2_dof(original_test[:, :3], target_test[:, :3], weights_dict, binning_dict=binning_dict)
-        chi2_8D_dict = chi2_dof(original_test[:, :8], target_test[:, :8], weights_dict, binning_dict=binning_dict)
-        chi2_21D_dict = chi2_dof(original_test[:, :21], target_test[:, :21], weights_dict, binning_dict=binning_dict)
+        chi2_3D_dict = chi2_dof(original_test[:, :3], target_test[:, :3], weights_dict, binning_dict=binning_dict, List_param_interest = List_all_parameters[:3])
+        chi2_3D_p_values = {key: chi2_p_value(chi2*87, 87) for key, chi2 in chi2_3D_dict.items()}
+        chi2_8D_dict = chi2_dof(original_test[:, :8], target_test[:, :8], weights_dict, binning_dict=binning_dict, List_param_interest = List_all_parameters[:8])
+        chi2_21D_dict = chi2_dof(original_test, target_test, weights_dict, binning_dict=binning_dict, List_param_interest = List_all_parameters)
 
 
     if args.compute_swd:
@@ -108,7 +121,7 @@ if __name__ == "__main__":
         swd_list_21D = np.load(args.swd_distribution_21D)
         swd_dict_3D = compute_swd(original_test[:, :3], target_test[:, :3], weights_dict)
         swd_dict_8D = compute_swd(original_test[:, :8], target_test[:, :8], weights_dict)
-        swd_dict_21D = compute_swd(original_test[:, :21], target_test[:, :21], weights_dict)
+        swd_dict_21D = compute_swd(original_test, target_test, weights_dict)
 
         p_value_dict_3D = compute_p_value(swd_dict_3D, swd_list_3D)
         p_value_dict_8D = compute_p_value(swd_dict_8D, swd_list_8D)
@@ -120,6 +133,7 @@ if __name__ == "__main__":
     if args.compute_chi2:
         metrics_dict['chi2_1D'] = chi2_dict
         metrics_dict['chi2_3D'] = chi2_3D_dict
+        metrics_dict['chi2_3D_p_value'] = chi2_3D_p_values
         metrics_dict['chi2_8D'] = chi2_8D_dict
         metrics_dict['chi2_21D'] = chi2_21D_dict
     if args.compute_swd:

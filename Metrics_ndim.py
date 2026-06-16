@@ -14,26 +14,34 @@ import ot
 from joblib import Parallel, delayed
 from matplotlib.backends.backend_pdf import PdfPages
 import mplhep as mh
-
+from scipy.stats import chi2 as chi2_dist
 
 def plot_histograms(original, target, weights_dict, dict_binning, original_weights = None, target_weights = None, 
                     xlabels = ["E_nu(GeV)", "E_lepton(GeV)", "cos_theta_lepton"],
+                    variables = ["E_nu", "E_lepton", "cos_theta_lepton"],
                     add_wass_distance = True, add_chi2 = True, output_file = "/home/hep/tlt26/T2K_Rw/Ndim/saved_figures/live.pdf"):
     """This function plots the original, reweighted and target distributions for each variable, with a ratio plot of the reweighted
       distribution over the target distribution. The weights_dict is a dictionary containing the predicted weights for each method, 
       with the method name as key and the weights as value."""
     mh.style.use("DUNE")
     with PdfPages(f"{output_file}") as pdf:
-        for i in range(len(xlabels)):    
-            #For the sake of the plots in this particular function, we use a binning that expands from the 1st to the 99th percentile 
-            #of the target distribution.
-            #Note that this might not be the best choice for a physical interpretation.
-            first_percentile = np.percentile(target[:, i], 1)
-            ninety_ninth_percentile = np.percentile(target[:, i], 99)
-            # x_min = dict_binning[xlabels[i]]["x_min"]
-            # x_max = dict_binning[xlabels[i]]["x_max"]
-            # n_bins = dict_binning[xlabels[i]]["n_bins"]
-            bins = np.linspace(first_percentile, ninety_ninth_percentile, 30)
+        for var in variables:    
+            #For the sake of the plots in this function, we use a given binning for each variable, specified in the dict_binning.
+            #If the variable is not present, we use a default binning : uniform between the 1st and 99th percentiles of the target distribution for this 
+            #variable.
+            i = variables.index(var)
+            if var in dict_binning.keys():
+                x_min = dict_binning[var]["x_min"]
+                x_max = dict_binning[var]["x_max"]
+                n_bins = dict_binning[var]["n_bins"]
+                bins = np.linspace(x_min, x_max, n_bins)
+            else:
+                x_min = None
+                x_max = None
+                first_percentile = np.percentile(target[:, i], 1)
+                ninety_ninth_percentile = np.percentile(target[:, i], 99)
+                bins = np.linspace(first_percentile, ninety_ninth_percentile, 31)
+
             bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
             # Getting the distributions and their uncertainties, with a normalization to the total number of events
@@ -72,7 +80,7 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
             # print(np.sum(original_counts))
             
             fig, (ax_main, ax_ratio) = plt.subplots(
-                2, 1, figsize=(8, 8), gridspec_kw={'height_ratios':[2,1], 'hspace': 0}, sharex=True
+                2, 1, figsize=(8, 8), gridspec_kw={'height_ratios':[2,1], 'hspace': 0.1}, sharex=True
             )
 
             colors = {}
@@ -90,7 +98,7 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
 
             if add_chi2:
                 for key in weights_dict.keys():
-                    chi2, dof = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, n_bins= 30)
+                    chi2, dof = chi2_hist_axis(original, target, weights_dict[key], i, target_weights, n_bins= 30, x_min=x_min, x_max=x_max)
                     chi2_values[key] = chi2/dof if dof > 0 else 0
 
             # if text_str != "WD- \nChi2-":
@@ -101,18 +109,24 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
 
             # Distribution plot
             ax_main.errorbar(bin_centers, target_counts, yerr=target_uncertainty, fmt='o', label='Target')
+            ax_main.set_xlim(bins[0], bins[-1])
         
             for k in range(len(weights_dict)):
                 key = list(weights_dict.keys())[k]
-                line_rw, = ax_main.step(bin_centers, original_rw_counts_list[k], markersize=0, where='mid',
-                                        label=f'{key} - Chi2: {chi2_values[key]:.2f}' if add_chi2 else f'{key}')
+                line_rw, = ax_main.step(bins, np.r_[original_rw_counts_list[k],
+                                        original_rw_counts_list[k][-1]], 
+                                        markersize=0,
+                                        where='post',
+                                        label=f'{key[0].upper() + key[1:]}' + r"- $\chi^2_{dof}$:" + f" {chi2_values[key]:.2f}" if add_chi2 else f'{key[0].upper() + key[1:]}')
                 colors[f'{key}'] = line_rw.get_color()
+                
                 ax_main.fill_between(bin_centers, original_rw_counts_list[k]-original_rw_counts_uncert_list[k]/2, 
                                     original_rw_counts_list[k]+original_rw_counts_uncert_list[k]/2, step = 'mid', 
                                     alpha=0.3)
-        
-            ax_main.set_ylabel("Frequency")
-            ax_main.legend()
+            bottom, top = ax_main.get_ylim()
+            ax_main.set_ylim(int(0), top)
+            ax_main.set_ylabel("Frequency", fontsize=22)
+            ax_main.legend(fontsize = 13)
         
 
             # Ratio plot (Data / Reweighted Original)
@@ -124,28 +138,39 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
                 ratio_rw_err = original_rw_counts_uncert_list[k] / original_rw_counts_list[k]
 
                 # Plot ratio points with reweighting uncertainty
-                ax_ratio.step(bin_centers, ratio, where='mid', markersize = 0.3, 
+                ax_ratio.step(bins, np.r_[ratio, ratio[-1]],
+                              where = 'post', 
+                              markersize = 0.3, 
                               marker = markers_list[k], 
                               color = colors[f'{list(weights_dict.keys())[k]}'])
                 ax_ratio.errorbar(bin_centers, ratio, yerr=ratio_rw_err, fmt=markers_list[k], capsize=3, color = colors[f'{list(weights_dict.keys())[k]}'])
 
             # Data uncertainty for the y=1 band
-            data_band_lower = 1 - ((target_uncertainty / target_counts) / 2)
-            data_band_upper = 1 + ((target_uncertainty / target_counts) / 2)
+            rel_unc = np.zeros_like(target_uncertainty, dtype=float)
+
+            np.divide(
+                target_uncertainty,
+                target_counts,
+                out=rel_unc,
+                where=target_counts != 0
+            )
+            
+            data_band_lower = np.r_[1 - rel_unc/2, (1 - rel_unc/2)[-1]]
+            data_band_upper = np.r_[1 + rel_unc/2, (1 + rel_unc/2)[-1]]
 
             # Plot horizontal line y=1 with data uncertainty band
-            ax_ratio.fill_between(bin_centers, data_band_lower, data_band_upper, color='grey', alpha=0.3, step='mid', label='Stat unc.')
-
+            ax_ratio.fill_between(bins, data_band_lower, data_band_upper, color='grey', alpha=0.3, step='post', label='Stat unc.')
+            ax_ratio.set_xlim(bins[0], bins[-1])
             ax_ratio.axhline(1, color='gray', linestyle='--')
 
-            ax_ratio.set_xlabel(xlabels[i])
-            ax_ratio.set_ylabel("Target / Reweighted Original")
-            ax_ratio.set_ylim(0.5, 1.5)
-            ax_ratio.legend()
+            ax_ratio.set_xlabel(xlabels[i], fontsize=22)
+            ax_ratio.set_ylabel("Target / Rw Original", fontsize=22)
+            ax_ratio.set_ylim(0.50, 1.50)
+            ax_ratio.legend(fontsize = 13)
             mh.set_fitting_ylabel_fontsize(ax_ratio)
-            plt.tight_layout()
+            # plt.tight_layout()
             #plt.suptitle(f"Original, Reweighted and Target distributions with Ratio Plot (rw_dim = {len(list_parameters)})", y=1.02, fontsize=12)
-            mh.add_text(f"Original, Reweighted and Target distributions", ax = ax_main, loc = "over left", fontsize = 14)
+            # mh.add_text(f"Original, Reweighted and Target distributions", ax = ax_main, loc = "over left", fontsize = 17)
             pdf.savefig(fig)
             plt.close(fig)
 
@@ -260,10 +285,13 @@ def plot_2D_histogram(original, target, weights_dict, target_weights = None, xla
 
     return None
 
-def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, x_min=0, x_max=1, n_bins = 30):
-    first_percentile = np.percentile(target[:, axis_number], 1)
-    ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
-    bins = np.linspace(first_percentile, ninety_ninth_percentile, n_bins)
+def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = None, n_bins = 30, x_min=None, x_max=None):
+    if (x_min is not None) and (x_max is not None):
+        bins = np.linspace(x_min, x_max, n_bins+1)
+    else:
+        first_percentile = np.percentile(target[:, axis_number], 1)
+        ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
+        bins = np.linspace(first_percentile, ninety_ninth_percentile, n_bins+1)
 
     if target_weights is not None:
         hist_target = np.histogram(target[:, axis_number], bins=bins, weights=target_weights/np.sum(target_weights))[0]
@@ -281,29 +309,41 @@ def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = N
     sigma2 = target_weights_squared_sum + rw_weight_squared_sum
     mask = sigma2 > 0
     chi2 = np.sum((hist_original_rw[mask] - hist_target[mask]) ** 2 / (sigma2[mask]))
-    dof = np.sum(mask)
+    if np.sum(mask) >= 2:
+        dof = np.sum(mask) - 1
+    else :
+        dof = 1
     return chi2, dof
 
-def chi2_hist_naxis(original, target, rw_weights, binning_dict, target_weights = None):
-    # List_parameters = list(binning_dict.keys())
+def chi2_hist_naxis(original, target, rw_weights, binning_dict, target_weights = None, List_param_interest = ["Enu_true", "Plep", "CosLep"]):
     n = original.shape[1]
     chi2 = 0
     dof = 0
-    for axis_number in range(n):
-        # x_min = binning_dict[List_parameters[axis_number]]["x_min"]
-        # x_max = binning_dict[List_parameters[axis_number]]["x_max"]
-        # n_bins = binning_dict[List_parameters[axis_number]]["n_bins"]
-        chi2_val, dof_val = chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, n_bins=30)
+    for var in List_param_interest:
+        axis_number = List_param_interest.index(var)
+        if var in binning_dict.keys():
+            x_min = binning_dict[var]["x_min"]
+            x_max = binning_dict[var]["x_max"]
+            n_bins = binning_dict[var]["n_bins"]
+        else :
+            x_min = None
+            x_max = None
+            n_bins = 30
+        chi2_val, dof_val = chi2_hist_axis(original, target, rw_weights, axis_number, target_weights, n_bins=n_bins, x_min=x_min, x_max=x_max)
         chi2 += chi2_val
         dof += dof_val
     return chi2, dof
 
-def chi2_dof(original, target, weights_dict, binning_dict, target_weights = None):
+def chi2_dof(original, target, weights_dict, binning_dict, target_weights = None, List_param_interest = ["Enu_true", "Plep", "CosLep"]):
     dict_chi2 = {}
     for key in weights_dict.keys():
-        chi2, dof = chi2_hist_naxis(original, target, weights_dict[key], binning_dict, target_weights)
+        chi2, dof = chi2_hist_naxis(original, target, weights_dict[key], binning_dict, target_weights, List_param_interest)
         dict_chi2[key] = chi2 / dof if dof > 0 else 0
     return dict_chi2
+
+def chi2_p_value(chi2, dof):
+    p_value = 1 - chi2_dist.cdf(chi2, dof)
+    return p_value
 
 
 def compute_swd(original, target, weights_dict, target_weights = None, n_directions=500):
