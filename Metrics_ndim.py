@@ -39,6 +39,8 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
                 x_min = None
                 x_max = None
                 first_percentile = np.percentile(target[:, i], 1)
+                if np.abs(first_percentile) < 5e-2:
+                    first_percentile = 0
                 ninety_ninth_percentile = np.percentile(target[:, i], 99)
                 bins = np.linspace(first_percentile, ninety_ninth_percentile, 31)
 
@@ -117,16 +119,21 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
                                         original_rw_counts_list[k][-1]], 
                                         markersize=0,
                                         where='post',
-                                        label=f'{key[0].upper() + key[1:]}' + r"- $\chi^2_{dof}$:" + f" {chi2_values[key]:.2f}" if add_chi2 else f'{key[0].upper() + key[1:]}')
+                                        label=f'{key[0].upper() + key[1:]}' + r" $\chi^2_{dof}$:" + f" {chi2_values[key]:.2f}" if add_chi2 else f'{key[0].upper() + key[1:]}')
                 colors[f'{key}'] = line_rw.get_color()
                 
-                ax_main.fill_between(bin_centers, original_rw_counts_list[k]-original_rw_counts_uncert_list[k]/2, 
-                                    original_rw_counts_list[k]+original_rw_counts_uncert_list[k]/2, step = 'mid', 
+                original_rw_unc_lower = np.r_[original_rw_counts_list[k] - original_rw_counts_uncert_list[k]/2, (original_rw_counts_list[k] - original_rw_counts_uncert_list[k]/2)[-1]]
+                original_rw_unc_upper = np.r_[original_rw_counts_list[k] + original_rw_counts_uncert_list[k]/2, (original_rw_counts_list[k] + original_rw_counts_uncert_list[k]/2)[-1]]
+
+                ax_main.fill_between(bins, original_rw_unc_lower, 
+                                    original_rw_unc_upper, step = 'post', 
                                     alpha=0.3)
             bottom, top = ax_main.get_ylim()
-            ax_main.set_ylim(int(0), top)
+            ax_main.set_ylim(int(0), 1.2*top)
             ax_main.set_ylabel("Frequency", fontsize=22)
-            ax_main.legend(fontsize = 13)
+            # handles, labels = ax_main.get_legend_handles_labels()
+            # order = [0, 4, 2, 3, 1, 5]  
+            ax_main.legend(fontsize = 15, ncols = 3, loc = 'upper center', handlelength=1.2)
         
 
             # Ratio plot (Data / Reweighted Original)
@@ -166,7 +173,7 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
             ax_ratio.set_xlabel(xlabels[i], fontsize=22)
             ax_ratio.set_ylabel("Target / Rw Original", fontsize=22)
             ax_ratio.set_ylim(0.50, 1.50)
-            ax_ratio.legend(fontsize = 13)
+            ax_ratio.legend(fontsize = 15)
             mh.set_fitting_ylabel_fontsize(ax_ratio)
             # plt.tight_layout()
             #plt.suptitle(f"Original, Reweighted and Target distributions with Ratio Plot (rw_dim = {len(list_parameters)})", y=1.02, fontsize=12)
@@ -290,6 +297,8 @@ def chi2_hist_axis(original, target, rw_weights, axis_number, target_weights = N
         bins = np.linspace(x_min, x_max, n_bins+1)
     else:
         first_percentile = np.percentile(target[:, axis_number], 1)
+        if np.abs(first_percentile) < 5e-2:
+            first_percentile = 0
         ninety_ninth_percentile = np.percentile(target[:, axis_number], 99)
         bins = np.linspace(first_percentile, ninety_ninth_percentile, n_bins+1)
 
