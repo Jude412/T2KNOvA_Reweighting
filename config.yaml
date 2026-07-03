@@ -38,8 +38,12 @@ analysis:
   modes_v2:
     - 0
     - 1
-    - 2
+    - 2 
     - 3
+    - 4
+    - 5
+    - 6
+    - 7
 
   #choose in 0, 1, 2, 3, 4, 5, 6 and 7 (0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE)
 
@@ -53,9 +57,6 @@ features:
     - Enu_true
     - Plep
     - CosLep
-    - PTlep
-    - Eav
-    - W
 
     
   
@@ -74,8 +75,8 @@ models:
     
 
 dimensions:
-  dim: 6
+  dim: 3_custom
   # In case of 3 or 8 dimensions, add an extra string (ex: "_custom") to dim, to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
 
 output:
-  tag: "6D_Modev2_0to3_gathered"
+  tag: "3D_bootstrap"

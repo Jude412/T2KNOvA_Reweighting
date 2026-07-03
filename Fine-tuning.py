@@ -208,7 +208,7 @@ if __name__ == "__main__":
     metrics[f"chi2_dof_3D"] = chi2_dof(original_test_3D, target_test_3D, weight_dict, binning_dict=binning_dict, List_param_interest = List_parameters_21D[:3])[args.model]
     metrics[f"chi2_dof_8D"] = chi2_dof(original_test_8D, target_test_8D, weight_dict, binning_dict=binning_dict, List_param_interest = List_parameters_21D[:8])[args.model]
     metrics[f"chi2_dof_21D"] = chi2_dof(original_test_21D, target_test_21D, weight_dict, binning_dict=binning_dict, List_param_interest = List_parameters_21D)[args.model]
-    metrics[f"chi2_dof_{original_test.shape[1]}D"] = chi2_dof(original_test, target_test, weight_dict, binning_dict=binning_dict, List_param_interest = List_parameters_21D[:, Index_params_interest])[args.model]
+    metrics[f"chi2_dof_{original_test.shape[1]}D"] = chi2_dof(original_test, target_test, weight_dict, binning_dict=binning_dict, List_param_interest = [List_parameters_21D[i] for i in Index_params_interest])[args.model]
 
     print(f"p_value_3D : {p_value_3D}")
     print(f"p_value_8D : {p_value_8D}")

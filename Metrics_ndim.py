@@ -122,11 +122,12 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
                                         label=f'{key[0].upper() + key[1:]}' + r" $\chi^2_{dof}$:" + f" {chi2_values[key]:.2f}" if add_chi2 else f'{key[0].upper() + key[1:]}')
                 colors[f'{key}'] = line_rw.get_color()
                 
-                original_rw_unc_lower = np.r_[original_rw_counts_list[k] - original_rw_counts_uncert_list[k]/2, (original_rw_counts_list[k] - original_rw_counts_uncert_list[k]/2)[-1]]
-                original_rw_unc_upper = np.r_[original_rw_counts_list[k] + original_rw_counts_uncert_list[k]/2, (original_rw_counts_list[k] + original_rw_counts_uncert_list[k]/2)[-1]]
+                original_rw_unc_lower = np.r_[original_rw_counts_list[k] - original_rw_counts_uncert_list[k], (original_rw_counts_list[k] - original_rw_counts_uncert_list[k])[-1]]
+                original_rw_unc_upper = np.r_[original_rw_counts_list[k] + original_rw_counts_uncert_list[k], (original_rw_counts_list[k] + original_rw_counts_uncert_list[k])[-1]]
 
                 ax_main.fill_between(bins, original_rw_unc_lower, 
                                     original_rw_unc_upper, step = 'post', 
+                                    color = colors[f'{key}'],
                                     alpha=0.3)
             bottom, top = ax_main.get_ylim()
             ax_main.set_ylim(int(0), 1.2*top)
@@ -162,8 +163,8 @@ def plot_histograms(original, target, weights_dict, dict_binning, original_weigh
                 where=target_counts != 0
             )
             
-            data_band_lower = np.r_[1 - rel_unc/2, (1 - rel_unc/2)[-1]]
-            data_band_upper = np.r_[1 + rel_unc/2, (1 + rel_unc/2)[-1]]
+            data_band_lower = np.r_[1 - rel_unc, (1 - rel_unc)[-1]]
+            data_band_upper = np.r_[1 + rel_unc, (1 + rel_unc)[-1]]
 
             # Plot horizontal line y=1 with data uncertainty band
             ax_ratio.fill_between(bins, data_band_lower, data_band_upper, color='grey', alpha=0.3, step='post', label='Stat unc.')
