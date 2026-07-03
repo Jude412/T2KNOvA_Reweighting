@@ -65,7 +65,11 @@ features:
 
 models:
   model_list:
+    - binning
+    - NN
+    - GBR
     - XGB
+  # choose from binning, NN, GBR (HEP_ML) and XGB (XGBoost)
   
   number_model_hyperparameters_sets:
     binning: 24
