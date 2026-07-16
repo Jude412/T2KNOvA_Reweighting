@@ -38,13 +38,13 @@ def convert_NEUT_input_file_ndim(input_file, mode, neutrino_PDG, list_parameters
 
 def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     """This function takes as input a ROOT FlatTree from Nuisance and returns an array containing all the parameters of interest.
-    They are : E_nu, E_lep, cos(theta_lep), Q2, q0, q3, W, Eav, y, neutrino PDG, interaction, mode, charged current,
+    They are : E_nu, E_lep, cos(theta_lep), Q2, q0, q3, W, EavAlt, y, neutrino PDG, interaction, mode, charged current,
     hit nucleus atomic number, hit nucleon PDG, multiplicity of final state proton, neutron, pions and the sum of their kinetic energies. """
     # Open the ROOT file
     file = uproot.open(input_file)
-    branches = ["Enu_true", "ELep", "CosLep", "Eav", "Q2", "q0", "q3", "W", "y",
+    branches = ["Enu_true", "ELep", "CosLep", "EavAlt", "Q2", "q0", "q3", "W", "y",
                  "PDGnu", "Mode", "cc", "nfsp", "px", "py", "pz", "E", "pdg", "pdg_vert", "px", "py", "pz"]
-    List_final_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "PTlep",
+    List_final_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "EavAlt", "y", "PTlep",
                  "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     tree = file["FlatTree_VARS"].arrays(branches, library="ak")
     
@@ -54,7 +54,7 @@ def convert_NEUT_input_file_alldim(input_file, modes = None, modes_v2 = None):
     if bool(set(modes) & set(weird_modes)):
         print("Warning there are undefined (-999) values in some events for the Q2, q0 and q3 parameters in the modes you are trying to extract." \
         "We removed such events from the tree, but be careful.")
-        weird_mask = (tree["Q2"] <= -1) | (tree["q0"] <= -1) | (tree["q3"] <= -1) | (tree["Eav"] <= -1) | (tree["W"] <= -1)
+        weird_mask = (tree["Q2"] <= -1) | (tree["q0"] <= -1) | (tree["q3"] <= -1) | (tree["EavAlt"] <= -1) | (tree["W"] <= -1)
         tree = tree[~weird_mask]
 
     # we now compute the parameters of interest

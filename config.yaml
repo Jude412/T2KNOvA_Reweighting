@@ -1,6 +1,6 @@
 paths:
-  neut_file: "/home/hep/tlt26/RW_Snakemake/NEUT_file/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root"
-  genie_file: "/home/hep/tlt26/RW_Snakemake/GENIE_file/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root"
+  neut_file: "/home/jmm224/reweighting/NEUT_files/T2KND_FHC_numu_H2O_NEUT580_1M_0000_NUISFLAT.root"
+  genie_file: "/home/jmm224/reweighting/GENIE_files/T2KND_FHC_numu_H2O_GENIEv3_G18_10a_00_000_1M_0000_NUISFLAT.root"
 
 analysis:
   modes: 
@@ -36,14 +36,14 @@ analysis:
     
 
   modes_v2:
-    - 0
+    # - 0
     - 1
-    - 2 
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
+    # - 2 
+    # - 3
+    # - 4
+    # - 5
+    # - 6
+    # - 7
 
   #choose in 0, 1, 2, 3, 4, 5, 6 and 7 (0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE)
 
@@ -57,17 +57,20 @@ features:
     - Enu_true
     - Plep
     - CosLep
+    - EavAlt
+    - W
+    - PTlep
 
     
   
-  binning_file: "/home/hep/tlt26/RW_Snakemake/binnings.json"
+  binning_file: "/home/jmm224/reweighting/binnings.json"
 
 
 models:
   model_list:
-    - binning
-    - NN
-    - GBR
+    # - binning
+    # - NN
+    # - GBR
     - XGB
   # choose from binning, NN, GBR (HEP_ML) and XGB (XGBoost)
   
@@ -79,8 +82,8 @@ models:
     
 
 dimensions:
-  dim: 3_custom
+  dim: 6
   # In case of 3 or 8 dimensions, add an extra string (ex: "_custom") to dim, to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
 
 output:
-  tag: "3D_bootstrap"
+  tag: "JudeTest2"

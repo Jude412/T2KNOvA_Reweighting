@@ -8,4 +8,6 @@ pandas
 uproot
 awkward
 snakemake
-POT
+xgboost
+pot
+tensorboard

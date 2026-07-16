@@ -41,7 +41,7 @@ if __name__ == "__main__":
     argparser.add_argument('--param_trained', type=str, nargs='+', required=False, help='Name of the parameter on which the model was trained')
     args = argparser.parse_args()
 
-    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "Mode", "Mode_v2",
+    List_parameters = ["Enu_true", "ELep", "CosLep", "Q2", "q0", "q3", "W", "EavAlt", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
 
     # Load data, model, binning and swd distribution
