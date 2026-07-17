@@ -39,10 +39,10 @@ if __name__ == "__main__":
     # Getting data from the files
     print("Getting data from the files...")
     # The params we want from the files
-    List_parameters_analysis = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "EavAlt", "W", "y", "Mode", "Mode_v2",
+    List_parameters_analysis = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "Eav", "W", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     # The output from reading the files
-    List_all_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "EavAlt", "y", "PTlep",
+    List_all_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "PTlep",
                  "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     
     Index_21D_params = [List_all_params.index(param) for param in List_parameters_analysis]

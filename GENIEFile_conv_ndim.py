@@ -37,13 +37,13 @@ def convert_GENIE_input_file_ndim(input_file, mode, neutrino_PDG, list_parameter
     
 def convert_GENIE_input_file_alldim(input_file, modes = None, modes_v2 = None):
     """This function takes as input a ROOT FlatTree from Nuisance and returns an array containing all the parameters of interest.
-    They are : E_nu, E_lep, cos(theta_lep), Q2, q0, q3, W, EavAlt, y, neutrino PDG, interaction, mode, charged current,
+    They are : E_nu, E_lep, cos(theta_lep), Q2, q0, q3, W, Eav, y, neutrino PDG, interaction, mode, charged current,
     hit nucleus atomic number, hit nucleon PDG, multiplicity of final state proton, neutron, pions and the sum of their kinetic energies. """
     # Open the ROOT file
     file = uproot.open(input_file)
-    branches = ["Enu_true", "ELep", "CosLep", "EavAlt", "Q2", "q0", "q3", "W", "y",
+    branches = ["Enu_true", "ELep", "CosLep", "Eav", "Q2", "q0", "q3", "W", "y",
                  "PDGnu", "Mode", "cc", "nfsp", "px", "py", "pz", "E", "pdg", "pdg_vert", "px", "py", "pz"]
-    List_final_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "EavAlt", "y", "PTlep",
+    List_final_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "PTlep",
                  "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     tree = file["FlatTree_VARS"].arrays(branches, library="ak")
     

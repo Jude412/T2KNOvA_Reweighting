@@ -28,12 +28,12 @@ if __name__ == "__main__":
     argparser.add_argument("--samples_dir", required=False, type=str, help="Path to the output directory where the splitted samples will be saved.",
                             default="/home/hep/tlt26/RW_Snakemake/saved_samples/first_test/")
     argparser.add_argument("--parameters_interest", nargs='+', required=False, help="List of parameters to keep from the original files, in the format 'param1,param2,...'.",
-                           default=["Enu_true", "ELep", "CosLep", "W", "EavAlt"])
+                           default=["Enu_true", "ELep", "CosLep", "W", "Eav"])
     args = argparser.parse_args()
 
     # Getting data from the files
     print("Getting data from the files...")
-    List_all_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "EavAlt", "y", "PTlep",
+    List_all_params = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "W", "Eav", "y", "PTlep",
                  "PDGnu", "Mode", "Mode_v2", "cc", "hitnuc", "A", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     Params_of_interest = args.parameters_interest
     original_load = convert_NEUT_input_file_alldim(args.input_file_NEUT, modes = args.modes, modes_v2 = args.modes_v2)

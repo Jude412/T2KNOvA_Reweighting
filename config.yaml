@@ -1,49 +1,49 @@
 paths:
-  neut_file: "/home/jmm224/reweighting/NEUT_files/T2KND_FHC_numu_H2O_NEUT580_1M_0000_NUISFLAT.root"
-  genie_file: "/home/jmm224/reweighting/GENIE_files/T2KND_FHC_numu_H2O_GENIEv3_G18_10a_00_000_1M_0000_NUISFLAT.root"
+  neut_file: "/home/jmm224/reweighting/NEUT_files/T2KND_FHC_numu_H2O_NEUT562_1M_0000_NUISFLAT.root"
+  genie_file: "/home/jmm224/reweighting/GENIE_files/T2KND_FHC_numu_H2O_GENIEv3_G18_10b_00_000_1M_0000_NUISFLAT.root"
 
 analysis:
   modes: 
     - 1
     - 2
-    - 11
-    - 12
-    - 13
-    - 16
-    - 17
-    - 21
-    - 22
-    - 23
-    - 26
-    - 31
-    - 32
-    - 33
-    - 34
-    - 36
-    - 38
-    - 39
-    - 41
-    - 42
-    - 43
-    - 44
-    - 45
-    - 46
-    - 51
-    - 52
+    # - 11
+    # - 12
+    # - 13
+    # - 16
+    # - 17
+    # - 21
+    # - 22
+    # - 23
+    # - 26
+    # - 31
+    # - 32
+    # - 33
+    # - 34
+    # - 36
+    # - 38
+    # - 39
+    # - 41
+    # - 42
+    # - 43
+    # - 44
+    # - 45
+    # - 46
+    # - 51
+    # - 52
 
     #choose in 1, 2, 11, 12, 13, 16, 17, 21, 22, 23, 26, 31, 32, 33, 34, 36, 38, 39, 41, 42, 43, 44, 45, 46, 51 and 52
 
     
 
   modes_v2:
-    # - 0
+    - 0
     - 1
-    # - 2 
-    # - 3
-    # - 4
-    # - 5
-    # - 6
-    # - 7
+    - 2 
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
 
   #choose in 0, 1, 2, 3, 4, 5, 6 and 7 (0 for CC0pi, 1 for CC1pipm, 2 for CC1pi0, 3 for CCNpi, 4 for CCOther, 5 for the rest, 6 for CCgamma, 7 for CCOther_QE)
 
@@ -57,7 +57,7 @@ features:
     - Enu_true
     - Plep
     - CosLep
-    - EavAlt
+    - Eav
     - W
     - PTlep
 
@@ -86,4 +86,4 @@ dimensions:
   # In case of 3 or 8 dimensions, add an extra string (ex: "_custom") to dim, to rule out the degeneracy with the regular 3D and 8D cases (always computed for metrics).
 
 output:
-  tag: "JudeTest2"
+  tag: "6D_CCQE_XGB_Recreation"

@@ -42,7 +42,7 @@ if __name__ == "__main__":
                            default="/home/hep/tlt26/RW_Snakemake/binnings.json")
     args = argparser.parse_args()
 
-    List_all_parameters = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "EavAlt", "W", "y", "Mode", "Mode_v2",
+    List_all_parameters = ["Enu_true", "Plep", "CosLep", "Q2", "q0", "q3", "PTlep", "Eav", "W", "y", "Mode", "Mode_v2",
                 "cc", "hitnuc", "N_n", "K_n", "N_p", "K_p", "N_pi0", "K_pi0", "N_pip", "K_pip", "N_pim", "K_pim"]
     
     List_labels_all_parameters = [r"$E^{true}_{\nu}$ (GeV)", r"$p_{lep}$ (GeV/c)", r"$cos(\theta_{lep})$",
