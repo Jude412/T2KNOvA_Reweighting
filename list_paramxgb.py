@@ -1,8 +1,8 @@
 import json
 import os
-n_estimators_list = [200, 250, 300]
-max_depth_list = [9, 11, 13]
-learning_rate_list = [0.1, 0.2, 0.3, 0.4, 0.5]
+n_estimators_list = [100, 150, 200, 250, 300]
+max_depth_list = [3, 4, 5, 6, 7, 8, 9]
+learning_rate_list = [0.01, 0.05, 0.1, 0.2]
 subsample_list = [1]
 gamma_list = [0, 0.5] #default 0
 min_child_weight_list = [1] #default 1
@@ -27,7 +27,7 @@ for n_estimator in n_estimators_list:
                   with open(f"hps/XGB/XGB_hp_{counter}.json", "w") as f:
                     json.dump({"n_estimators": n_estimator, "learning_rate": learning_rate, "max_depth": max_depth, "subsample": subsample, "gamma": gamma, "min_child_weight": min_child_weight, "lambda": lambda_val, "alpha": alpha_val, "early_stopping_rounds": early_stopping_rounds}, f)
 
-                sub_file_template += f"/home/hep/tlt26/T2K_Rw/hps/XGB/XGB_hp_{counter}.json\n"
+                sub_file_template += f"/vols/dune/jmm224/t2knova/reweighting/hps/XGB/XGB_hp_{counter}.json\n"
                 counter += 1
 
 sub_file_template += ")"
